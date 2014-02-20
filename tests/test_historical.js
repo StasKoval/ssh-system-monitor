@@ -11,16 +11,22 @@ var Logger = require('../config').logger
     , nedb =  require('nedb')
     , mock = require('./mock');
 
-var sshConnPool = new ssh.SSHConnectionPool(serverConfig);
-var statsMonitor = new historical.StatsMonitor(sshConnPool, ['/home/ubuntu']);
+var sshConnPool;
+var statsMonitor;
 
-const REGEX_FLOAT = /^[0-9]*[.][0-9]+$/;
 const REGEX_FLOAT_OR_INT = /^[0-9]*([.][0-9]+)?$/;
 
+var sandbox;
 
 before(function () {
-    mock.stubSSH();
+    sandbox = mock.stubSSH();
+    sshConnPool = new ssh.SSHConnectionPool(serverConfig);
+    statsMonitor = new historical.StatsMonitor(sshConnPool, ['/home/ubuntu']);
     statsMonitor.start();
+});
+
+after(function () {
+    mock.clearSSHStubs();
 });
 
 describe ('StatsMonitor', function () {
@@ -219,8 +225,8 @@ describe("Statistic Collection & Analysis", function () {
                 function validateDatesOfResults(results) {
                     for (var i = 0; i < results.length; i++) {
                         var result = results[i];
-                        expect(result.date).to.be.below(endDate);
-                        expect(result.date).to.be.above(startDate);
+                        expect(result.date).to.be.at.most(endDate);
+                        expect(result.date).to.be.at.least(startDate);
                     }
                 }
 

@@ -6,13 +6,23 @@
 var Logger = require('../config.js').logger
     , expect = require("chai").expect
     , serverConfig = require('../config').servers[0]
-    , SSH = require('../src/ssh');
-
-var pool = new SSH.SSHConnectionPool(serverConfig);
+    , SSH = require('../src/ssh')
+    , mock = require('./mock');
 
 const REGEX_FLOAT_OR_INT = /^[0-9]*([.][0-9]+)?$/;
 
 describe('Stats', function() {
+
+    var pool;
+
+    before(function () {
+        mock.stubSSH();
+        pool = new SSH.SSHConnectionPool(serverConfig);
+    });
+
+    after(function () {
+        mock.clearSSHStubs();
+    });
 
     it("Raw Mem Info", function (done) {
         pool.oneShot(function(err, client) {
