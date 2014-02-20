@@ -6,12 +6,10 @@
 var Logger = require('../config.js').logger
     , expect = require("chai").expect
     , serverConfig = require('../config').servers[0]
-    , utils = require('../src/utils')
     , SSH = require('../src/ssh');
 
 var pool = new SSH.SSHConnectionPool(serverConfig);
 
-const REGEX_FLOAT = /^[0-9]*[.][0-9]+$/;
 const REGEX_FLOAT_OR_INT = /^[0-9]*([.][0-9]+)?$/;
 
 describe('Stats', function() {

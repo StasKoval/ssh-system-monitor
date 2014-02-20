@@ -198,12 +198,16 @@ function log(level, message) {
     Logger.log(level, message);
 }
 
+
+
 /**
  * Provides access to pool of ssh connections with basic system inspection methods
  * @param options
  * @constructor
  */
 var SSHConnectionPool = function(options) {
+
+    var self = this;
 
     if (!(this instanceof SSHConnectionPool))
         return new SSHConnectionPool(options);
@@ -220,7 +224,7 @@ var SSHConnectionPool = function(options) {
 
     this.pool = poolModule.Pool({
         name     : 'ssh',
-        create   : this.spawnClient,
+        create   : _.bind(this.spawnClient, self), // For some reason this bind is neccessary. Why?
         destroy  : function (c) {c.end()},
         max      : 10,
         min      : 2,
@@ -234,20 +238,21 @@ var SSHConnectionPool = function(options) {
 };
 
 SSHConnectionPool.prototype.spawnClient = function (callback) {
+    var self = this;
     var client = new VisionConnection();
     client.on('ready', function() {
-        log.call(this, 'info', 'Connection ready');
+        log.call(self, 'info', 'Connection ready');
         callback(null,client);
     });
     client.on('error', function(e) {
-        log.call(this, 'error', 'Error in ssh connection: ' + e);
+        log.call(self, 'error', 'Error in ssh connection: ' + e);
         callback(e,null);
     });
     client.on('end', function() {
-        log.call(this, 'info', 'Connection ended');
+        log.call(self, 'info', 'Connection ended');
     });
     client.on('close', function() {
-        log.call(this, 'info', 'Connection closed');
+        log.call(self, 'info', 'Connection closed');
     });
     client.connect({
         host: this.options.host,
@@ -275,6 +280,7 @@ SSHConnectionPool.prototype.drain = function (callback) {
 };
 
 SSHConnectionPool.prototype.oneShot = function(callback) {
+    var self = this;
     this.acquire(function(err, client) {
         if (err || client) {
             callback(err, client);
@@ -282,7 +288,7 @@ SSHConnectionPool.prototype.oneShot = function(callback) {
         else {
             callback('Unable to obtain an SSH client connection', null);
         }
-        this.release(client);
+        self.release(client);
     });
 };
 
