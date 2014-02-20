@@ -1,0 +1,36 @@
+{
+  "name": "ssh-system-monitor",
+  "version": "0.0.1",
+  "description": "A node.js application capable of monitoring multiple servers over ssh e.g. memory, cpu usage, swap usage, disk space. Information is collected into nedb. ",
+  "main": "scripts/collect.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "async": "~0.2.10",
+    "chai": "~1.9.0",
+    "generic-pool": "~2.0.4",
+    "nedb": "~0.10.4",
+    "ssh2": "~0.2.17",
+    "underscore": "~1.6.0",
+    "sinon": "~1.8.2",
+    "winston": "~0.7.2"
+  },
+  "devDependencies": {
+    "mocha": "~1.17.1",
+    "jasmine-node": "~1.13.1"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mtford90/ssh-system-monitor.git"
+  },
+  "author": "Michael Ford",
+  "license": "Apache License v2",
+  "bugs": {
+    "url": "https://github.com/mtford90/ssh-system-monitor/issues"
+  },
+  "homepage": "https://github.com/mtford90/ssh-system-monitor"
+}
