@@ -1,11 +1,14 @@
 ssh-system-monitor
 ==================
 
-A node.js application capable of monitoring multiple servers over ssh e.g. memory, cpu usage, swap usage, disk space. Information is collected into an [nedb](https://github.com/louischatriot/nedb) instance and ssh pooling is used for efficiency.
+A node.js application capable of monitoring multiple linux servers over ssh e.g. memory, cpu usage, swap usage, disk space. Information is collected into an [nedb](https://github.com/louischatriot/nedb) instance and ssh pooling is used for efficiency. It can be ran from any host, but is only capable of monitoring linux systems. 
 
 NOTE: This app has been adapted from the [clarity](https://github.com/mtford90/clarity) codebase for demonstration purposes.
 
+
+
 * [Install](#install)  
+* [Run](#run)
 * [Configuration](#configuration)  
     * [Servers](#servers)
     * [Data](#data)
@@ -25,8 +28,23 @@ Tested with node v0.10.22
 git clone https://github.com/mtford90/ssh-system-monitor .
 cd ssh-system-monitor
 npm install
-cp config.example.js config.js
 ```
+
+### Run
+
+First modify config.js to suit your needs (see [configuration](#configuration) section) and then:
+
+```bash
+npm start
+```
+
+Note, you can run some basic analysis once some stats have been collected by running:
+
+```bash
+npm run-script analysis
+```
+
+This will run the demo script in the [analytics section](#analytics)
 
 ### Configuration
 
@@ -37,27 +55,38 @@ See config.js
 Add as many `servers` as you would like e.g.
 
 ```javascript
-var servers = [{
-    name: 'My Server', // Identify the server
+exports.servers = [{
+   name: 'A password protected server',
+   host: '35.41.164.53',
+   username: 'bob',
+   password: 'bobsPassword'
+},
+{
+    name: 'A key protected server',
     host: '36.41.141.85',
-    port: 22,
+    port: 23,
     username: 'ubuntu',
     privateKey: '/path/to/privateKey.pem',
     monitoringOptions: {
-        swap: True,
-        cpu: True,
-        memory: True,
         diskSpace: ['/home/ubuntu/', '/mnt']
     }
 }];
 ```
+
+NOTE: Specifying `localhost` will attempt ssh connection to localhost as opposed to just executing the commands locally. (Obviously needs changing)
 
 #### Data
 
 Specify the data directory i.e. the location that the nedb database will be stored:
 
 ```javascript
-var dataFile = '/tmp/ssh-system-monitor/ssm.dat';
+exports.dataFile = '/tmp/ssh-system-monitor/ssm.dat';
+```
+
+Specify the rate at which to take data points
+
+```javascript
+exports.rate = 1000;
 ```
 
 #### SSH
@@ -65,13 +94,13 @@ var dataFile = '/tmp/ssh-system-monitor/ssm.dat';
 It's also possible to configure the maximum num. of SSH connections that can be pooled for each server and minimum num. to be maintained:
 
 ```javascript
-var poolSize = 10;
-var maintainConnections = 2;
+exports.poolSize = 10;
+exports.maintainConnections = 2;
 ```
 
 ### Analytics
 
-Once you have an nedb you can perform your own analysis or use the built in e.g.
+Once you have an nedb you can perform your own analysis or use the built in e.g:
 
 ```javascript
 var Nedb = require('nedb')
@@ -121,8 +150,10 @@ analytics.memoryUsage(null, null, function(err, results) {
 
 ### Testing
 
-If `integrationTestServer` is specified in config.js, tests will be applied against that server, otherwise the SSH connections will be mocked and will instead be ran as unit tests.
+Run unit tests:
 
 ```bash
 npm test
 ```
+
+**Note:** If you have servers configured in `exports.servers` in config.js, then the tests will be ran as integration tests, using those servers. So make sure they work. Otherwise everything is mocked.
