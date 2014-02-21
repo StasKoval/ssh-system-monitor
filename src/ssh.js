@@ -10,6 +10,49 @@ var poolModule = require('generic-pool');
 var _ = require('underscore');
 var util = require("util");
 
+// TODO: Get unix timestamp and return that along with the value.
+
+var memInfoKey = {
+    MemTotal: 'MemTotal',
+    MemFree: 'MemFree',
+    Buffers: 'Buffers',
+    Cached: 'Cached',
+    SwapCached: 'SwapCached',
+    Active: 'Active',
+    Inactive: 'Inactive',
+    Unevictable: 'Unevictable',
+    Mlocked: 'Mlocked',
+    SwapTotal: 'SwapTotal',
+    SwapFree: 'SwapFree',
+    Dirty: 'Dirty',
+    Writeback: 'Writeback',
+    AnonPages: 'AnonPages',
+    Mapped: 'Mapped',
+    Shmem: 'Shmem',
+    Slab: 'Slab',
+    SReclaimable: 'SReclaimable',
+    SUnreclaim: 'SUnreclaim',
+    KernelStack: 'KernelStack',
+    PageTables: 'PageTables',
+    NFS_Unstable: 'NFS_Unstable',
+    Bounce: 'Bounce',
+    WritebackTmp: 'WritebackTmp',
+    CommitLimit: 'CommitLimit',
+    Committed_AS: 'Committed_AS',
+    VmallocTotal: 'VmallocTotal',
+    VmallocUsed: 'VmallocUsed',
+    VmallocChunk: 'VmallocChunk',
+    HardwareCorrupted: 'HardwareCorrupted',
+    AnonHugePages: 'AnonHugePages',
+    HugePages_Total: 'HugePages_Total',
+    HugePages_Free: 'HugePages_Free',
+    HugePages_Rsvd: 'HugePages_Rsvd',
+    HugePages_Surp: 'HugePages_Surp',
+    Hugepagesize: 'Hugepagesize',
+    DirectMap4k: 'DirectMap4k',
+    DirectMap2M: 'DirectMap2M'
+};
+
 /**
  * Extends Connection with standard operations over ssh.
  * @param opts
@@ -17,46 +60,6 @@ var util = require("util");
  */
 var VisionConnection = function () {
     Connection.call(this);
-    this.memInfoKey = {
-        MemTotal: 'MemTotal',
-        MemFree: 'MemFree',
-        Buffers: 'Buffers',
-        Cached: 'Cached',
-        SwapCached: 'SwapCached',
-        Active: 'Active',
-        Inactive: 'Inactive',
-        Unevictable: 'Unevictable',
-        Mlocked: 'Mlocked',
-        SwapTotal: 'SwapTotal',
-        SwapFree: 'SwapFree',
-        Dirty: 'Dirty',
-        Writeback: 'Writeback',
-        AnonPages: 'AnonPages',
-        Mapped: 'Mapped',
-        Shmem: 'Shmem',
-        Slab: 'Slab',
-        SReclaimable: 'SReclaimable',
-        SUnreclaim: 'SUnreclaim',
-        KernelStack: 'KernelStack',
-        PageTables: 'PageTables',
-        NFS_Unstable: 'NFS_Unstable',
-        Bounce: 'Bounce',
-        WritebackTmp: 'WritebackTmp',
-        CommitLimit: 'CommitLimit',
-        Committed_AS: 'Committed_AS',
-        VmallocTotal: 'VmallocTotal',
-        VmallocUsed: 'VmallocUsed',
-        VmallocChunk: 'VmallocChunk',
-        HardwareCorrupted: 'HardwareCorrupted',
-        AnonHugePages: 'AnonHugePages',
-        HugePages_Total: 'HugePages_Total',
-        HugePages_Free: 'HugePages_Free',
-        HugePages_Rsvd: 'HugePages_Rsvd',
-        HugePages_Surp: 'HugePages_Surp',
-        Hugepagesize: 'Hugepagesize',
-        DirectMap4k: 'DirectMap4k',
-        DirectMap2M: 'DirectMap2M'
-    };
 };
 
 util.inherits(VisionConnection, Connection);
@@ -68,8 +71,12 @@ util.inherits(VisionConnection, Connection);
 VisionConnection.prototype.swapUsedPercentage = function(callback) {
     var self = this;
     this.memoryInfo(function (err, info) {
-        if (err) callback(err, null);
-        callback(null,info[self.memInfoKey.SwapFree]  / info[self.memInfoKey.SwapTotal]);
+        if (err && callback) {
+            callback(err, null);
+        }
+        else {
+            if (callback) callback(null,info[memInfoKey.SwapFree]  / info[memInfoKey.SwapTotal]);
+        }
     })
 };
 
@@ -82,11 +89,11 @@ VisionConnection.prototype.memoryUsed = function(callback) {
     this.memoryInfo(function (err, info) {
         if (err && callback) callback(err, null);
         else {
-            var memoryFree = info[self.memInfoKey.MemFree];
+            var memoryFree = info[memInfoKey.MemFree];
 //            var buffers = info[self.memInfoKey.Buffers];
-            var cached = info[self.memInfoKey.Cached];
+            var cached = info[memInfoKey.Cached];
             var realFree = memoryFree + cached;
-            var perc = realFree / info[self.memInfoKey.MemTotal];
+            var perc = realFree / info[memInfoKey.MemTotal];
             if (callback) callback(null, perc);
         }
     })
@@ -217,7 +224,9 @@ var SSHConnectionPool = function(options) {
         host: '',
         port: null,
         username: '',
-        privateKey: null
+        privateKey: null,
+        max: 10,
+        min: 2
     };
 
     this.options = Util.mergeOptions(defaultOptions, options);
@@ -225,9 +234,9 @@ var SSHConnectionPool = function(options) {
     this.pool = poolModule.Pool({
         name     : 'ssh',
         create   : _.bind(this.spawnClient, self), // For some reason this bind is neccessary. Why?
-        destroy  : function (c) {c.end()},
-        max      : 10,
-        min      : 2,
+        destroy  : _.bind(this.destroyClient, self),
+        max      : self.options.max,
+        min      : self.options.min,
         idleTimeoutMillis : 30000,
         log : true
     });
@@ -245,7 +254,7 @@ SSHConnectionPool.prototype.spawnClient = function (callback) {
         callback(null,client);
     });
     client.on('error', function(e) {
-        log.call(self, 'error', 'Error in ssh connection: ' + e);
+        log.call(self, 'error', self.toString() + ':' + e);
         callback(e,null);
     });
     client.on('end', function() {
@@ -261,6 +270,10 @@ SSHConnectionPool.prototype.spawnClient = function (callback) {
         privateKey: this.options.privateKey
     });
     return client;
+};
+
+SSHConnectionPool.prototype.destroyClient = function (client) {
+    client.end();
 };
 
 /**
@@ -292,5 +305,10 @@ SSHConnectionPool.prototype.oneShot = function(callback) {
     });
 };
 
+SSHConnectionPool.prototype.toString = function() {
+    return 'Pool<' + this.options.host + ':' + this.options.port.toString() + '>';
+};
+
 exports.SSHConnectionPool = SSHConnectionPool;
 exports.VisionConnection = VisionConnection;
+exports.memInfoKey = memInfoKey;

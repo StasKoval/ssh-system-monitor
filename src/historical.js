@@ -50,7 +50,7 @@ var StatsMonitor = function (sshPool, filePaths, rate) {
     };
 
     this.stop = function () {
-        if (Logger.verbose) Logger.verbose('Stopping stas monitor');
+        if (Logger.verbose) Logger.verbose('Stopping stats monitor');
         _.map(self.intervalIdentifiers, function(x) {clearInterval(x)});
         if (Logger.verbose) Logger.verbose('Stopped stats monitor');
     };
@@ -115,9 +115,6 @@ var StatsMonitor = function (sshPool, filePaths, rate) {
         });
     }
 
-    // TODO: Memory usage
-    // TODO: Pass paths to mounts and monitor historical disk space.
-
 };
 
 util.inherits(StatsMonitor, EventEmitter);
@@ -149,86 +146,71 @@ var LogStatsListener = function (statsMonitor) {
 
 /**
 *
-* @param statsMonitor
  * @param {Nedb} db - An instance of require('nedb')
+ * @param {...number} var_args
 * @constructor
 */
-var NedbStatsListener = function (statsMonitor, db) {
+var NedbStatsListener = function (db) {
 
-    // TODO: Add multiple server configurations
+    // TODO: new Date() on emission received. This doesn't reflect server time obviously... need that over SSH also.
 
-    if (!(this instanceof NedbStatsListener))
-        return new NedbStatsListener(statsMonitor, db);
-
-    this.start = statsMonitor.start;
-    this.stop = statsMonitor.stop;
+    this.statsMonitors = _.flatten(_.rest(arguments)); // This means that statsMonitors can be var_arg or array
 
     function getHost(statsMonitor) {
         return statsMonitor.sshPool.options.host;
     }
 
-    statsMonitor.on('error', function(err) {
-        Logger.error('Stats monitor returned error:', err);
-    });
+    for (var i=0;i<this.statsMonitors.length;i++) {
+        listenToStatsMonitor(this.statsMonitors[i]);
+    }
 
-    statsMonitor.on('cpuUsage', function(cpuUsage) {
-        //noinspection JSUnresolvedFunction
-        db.insert({
-            value: cpuUsage,
-            type: NedbStatsListener.types.cpuUsage,
-            host: getHost(statsMonitor),
-            date: new Date()
-        }, function (err, newObj) {
-            if (err) {
-                Logger.error('Error inserting cpu usage into nedb');
-            }
-            else {
-                Logger.debug('Created cpuUsage object with id',newObj._id);
-            }
+    function listenToStatsMonitor(statsMonitor) {
+
+        Logger.verbose('Listening to stats monitor');
+
+        statsMonitor.on('error', function (err) {
+            Logger.error('Stats monitor returned error:', err);
         });
-    });
 
-    statsMonitor.on('memoryUsed', function(value) {
-        //noinspection JSUnresolvedFunction
-        db.insert({
-            value: value,
-            type: NedbStatsListener.types.memoryUsed,
-            host: getHost(statsMonitor),
-            date: new Date()
-        }, function (err, newObj) {
-            if (err) {
-                Logger.error('Error inserting memory usage into nedb');
-            }
-            else {
-                Logger.debug('Created memoryUsed object with id',newObj._id);
-            }
-        });
-    });
-
-    statsMonitor.on('swapUsed', function(swapUsed) {
-        //noinspection JSUnresolvedFunction
-        db.insert({
-            value: swapUsed,
-            type: NedbStatsListener.types.swapUsed,
-            host: getHost(statsMonitor),
-            date: new Date()
-        }, function (err, newObj) {
-            if (err) {
-                Logger.error('Error inserting swap used into nedb');
-            }
-            else {
-                Logger.debug('Created swapused object with id',newObj._id);
-            }
-        });
-    });
-
-    statsMonitor.on('diskSpaceUsed', function(diskSpaceUsed) {
-        for (var path in diskSpaceUsed) {
-            //noinspection JSUnfilteredForInLoop
+        statsMonitor.on('cpuUsage', function (cpuUsage) {
+            //noinspection JSUnresolvedFunction
             db.insert({
-                value: diskSpaceUsed[path],
-                path: path,
-                type: NedbStatsListener.types.diskSpaceUsed,
+                value: cpuUsage,
+                type: NedbStatsListener.types.cpuUsage,
+                host: getHost(statsMonitor),
+                date: new Date()
+            }, function (err, newObj) {
+                if (err) {
+                    Logger.error('Error inserting cpu usage into nedb');
+                }
+                else {
+                    Logger.debug('Created cpuUsage object with id', newObj._id);
+                }
+            });
+        });
+
+        statsMonitor.on('memoryUsed', function (value) {
+            //noinspection JSUnresolvedFunction
+            db.insert({
+                value: value,
+                type: NedbStatsListener.types.memoryUsed,
+                host: getHost(statsMonitor),
+                date: new Date()
+            }, function (err, newObj) {
+                if (err) {
+                    Logger.error('Error inserting memory usage into nedb');
+                }
+                else {
+                    Logger.debug('Created memoryUsed object with id', newObj._id);
+                }
+            });
+        });
+
+        statsMonitor.on('swapUsed', function (swapUsed) {
+            //noinspection JSUnresolvedFunction
+            db.insert({
+                value: swapUsed,
+                type: NedbStatsListener.types.swapUsed,
                 host: getHost(statsMonitor),
                 date: new Date()
             }, function (err, newObj) {
@@ -236,12 +218,32 @@ var NedbStatsListener = function (statsMonitor, db) {
                     Logger.error('Error inserting swap used into nedb');
                 }
                 else {
-                    Logger.debug('Created diskSpaceUsed object with id',newObj._id);
+                    Logger.debug('Created swapused object with id', newObj._id);
                 }
             });
-        }
-    });
+        });
 
+        statsMonitor.on('diskSpaceUsed', function (diskSpaceUsed) {
+            for (var path in diskSpaceUsed) {
+                //noinspection JSUnfilteredForInLoop
+                db.insert({
+                    value: diskSpaceUsed[path],
+                    path: path,
+                    type: NedbStatsListener.types.diskSpaceUsed,
+                    host: getHost(statsMonitor),
+                    date: new Date()
+                }, function (err, newObj) {
+                    if (err) {
+                        Logger.error('Error inserting swap used into nedb');
+                    }
+                    else {
+                        Logger.debug('Created diskSpaceUsed object with id', newObj._id);
+                    }
+                });
+            }
+        });
+
+    }
 };
 
 var statTypes = {

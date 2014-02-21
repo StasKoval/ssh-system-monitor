@@ -16,12 +16,12 @@ describe('Stats', function() {
     var pool;
 
     before(function () {
-        mock.stubSSH();
+        if (!serverConfig) mock.stubSSH();
         pool = new SSH.SSHConnectionPool(serverConfig);
     });
 
-    after(function () {
-        mock.clearSSHStubs();
+    after(function (done) {
+        pool.drain(done);
     });
 
     it("Raw Mem Info", function (done) {
@@ -32,7 +32,7 @@ describe('Stats', function() {
                 expect(error).to.not.be.ok;
                 expect(data).to.be.ok;
                 Logger.info('Raw mem info: ', data);
-                var keys = Object.keys(client.memInfoKey);
+                var keys = Object.keys(SSH.memInfoKey);
                 for (var i=0;i<keys.length;i++) {
                     var key = keys[i];
                     Logger.debug('Testing for existence of ' + key + ' in mem info');
@@ -129,8 +129,3 @@ describe('Stats', function() {
 
 });
 
-after(function (done) {
-    pool.drain(function () {
-        done();
-    });
-});

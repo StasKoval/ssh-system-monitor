@@ -2,7 +2,7 @@
   "name": "ssh-system-monitor",
   "version": "0.0.1",
   "description": "A node.js application capable of monitoring multiple servers over ssh e.g. memory, cpu usage, swap usage, disk space. Information is collected into nedb. ",
-  "main": "scripts/collect.js",
+  "main": "src/ssh-system-monitor.js",
   "directories": {
     "test": "tests"
   },
@@ -21,7 +21,8 @@
     "jasmine-node": "~1.13.1"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+      "start": "node ./scripts/start.js"
   },
   "repository": {
     "type": "git",

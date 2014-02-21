@@ -7,7 +7,8 @@ var Logger = require('../config').logger
     , expect = require("chai").expect
     , historical =  require('../src/historical')
     , ssh = require('../src/ssh')
-    , serverConfig = require('../config').servers[0]
+    , config = require('../config')
+    , serverConfig = config.integrationTestServer
     , nedb =  require('nedb')
     , mock = require('./mock');
 
@@ -16,17 +17,12 @@ var statsMonitor;
 
 const REGEX_FLOAT_OR_INT = /^[0-9]*([.][0-9]+)?$/;
 
-var sandbox;
 
 before(function () {
-    sandbox = mock.stubSSH();
+    if (!serverConfig) mock.stubSSH();
     sshConnPool = new ssh.SSHConnectionPool(serverConfig);
     statsMonitor = new historical.StatsMonitor(sshConnPool, ['/home/ubuntu']);
     statsMonitor.start();
-});
-
-after(function () {
-    mock.clearSSHStubs();
 });
 
 describe ('StatsMonitor', function () {
@@ -71,7 +67,7 @@ describe("Statistic Collection & Analysis", function () {
     before(function () {
         Logger.info('Creating in memory db');
         db = new nedb(); // In memory nedb.
-        listener = new historical.NedbStatsListener(statsMonitor, db);
+        listener = new historical.NedbStatsListener(db, statsMonitor);
     });
 
     after(function () {
@@ -263,7 +259,5 @@ describe("Statistic Collection & Analysis", function () {
 after(function (done) {
     Logger.info('Draining SSH pool');
     statsMonitor.stop();
-    sshConnPool.drain(function () {
-        done();
-    });
+    sshConnPool.drain(done);
 });
