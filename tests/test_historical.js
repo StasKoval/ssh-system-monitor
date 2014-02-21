@@ -3,7 +3,7 @@
  */
 /*global describe, it, before, beforeEach, after, afterEach */
 
-var Logger = require('../config').logger
+var Logger = require('../src/config').logger
     , expect = require("chai").expect
     , historical =  require('../src/historical')
     , ssh = require('../src/ssh')

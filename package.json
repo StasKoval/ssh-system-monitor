@@ -21,8 +21,9 @@
     "jasmine-node": "~1.13.1"
   },
   "scripts": {
-    "test": "mocha",
-      "start": "node ./scripts/start.js"
+      "start": "node ./scripts/start.js",
+      "analysis": "node ./scripts/analysis.js",
+      "test": "mocha ./tests"
   },
   "repository": {
     "type": "git",

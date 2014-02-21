@@ -3,7 +3,7 @@
  */
 /* global describe, it, before, beforeEach, after, afterEach */
 
-var Logger = require('../config.js').logger
+var Logger = require('../src/config.js').logger
     , expect = require("chai").expect
     , serverConfig = require('../src/config').servers[0]
     , SSH = require('../src/ssh')

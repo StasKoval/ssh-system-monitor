@@ -25,7 +25,6 @@ exports.init = function () {
         var server = servers[i];
         Logger.debug('Configuring monitor for ' + server.name);
         Logger.debug('Reading private key for ' + server.name);
-        processServer(server);
         server.max = config.poolSize;
         server.min = config.maintainConnections;
         constructStatsMonitor(server);
@@ -44,16 +43,6 @@ exports.init = function () {
 
     Logger.info('Started!');
 
-
-    /**
-     * Given a server configuration, processes it so will be accepted by SSH library
-     * @param server
-     */
-    function processServer(server) {
-        if (server.hasOwnProperty('privateKey')) {
-            server.privateKey = require('fs').readFileSync('/Users/mtford/Dropbox/Drake/Server-Side/dev.pem').toString();
-        }
-    }
 
     /**
      * Given a server configuration, constructs a monitor that periodically polls the server over ssh connections
