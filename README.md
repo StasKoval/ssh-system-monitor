@@ -35,14 +35,13 @@ npm install
 First modify config.js to suit your needs (see [configuration](#configuration) section) and then:
 
 ```bash
-cd /path/to/ssh-system-monitor
 npm start
 ```
 
 Note, you can run some basic analysis once some stats have been collected by running:
 
 ```bash
-npm analysis
+npm run-script analysis
 ```
 
 This will run the demo script in the [analytics section](#analytics)
@@ -154,15 +153,7 @@ analytics.memoryUsage(null, null, function(err, results) {
 Run unit tests:
 
 ```bash
-cd /path/to/ssh-system-monitor
-npm unit
+npm test
 ```
 
-Run integration tests:
-
-```bash
-cd /path/to/ssh-system-monitor
-npm integrate
-```
-
-**Note:** integration tests will use `exports.servers` in config.js and hence these must all be valid otherwise integration tests fail.
+**Note:** If you have servers configured in `exports.servers` in config.js, then the tests will be ran as integration tests, using those servers. So make sure they work. Otherwise everything is mocked.
