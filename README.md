@@ -28,6 +28,21 @@ npm install
 cp config.example.js config.js
 ```
 
+### Run
+
+First modify config.js to suit your needs and then:
+
+```bash
+cd /path/to/ssh-system-monitor
+npm start
+```
+
+Note, you can run some basic analysis on the configured database by running:
+
+```bash
+npm analysis
+```
+
 ### Configuration
 
 See config.js
@@ -37,16 +52,19 @@ See config.js
 Add as many `servers` as you would like e.g.
 
 ```javascript
-var servers = [{
-    name: 'My Server', // Identify the server
+exports.servers = [{
+   name: 'A password protected server',
+   host: '35.41.164.53',
+   username: 'bob',
+   password: 'bobsPassword'
+},
+{
+    name: 'A key protected server',
     host: '36.41.141.85',
-    port: 22,
+    port: 23,
     username: 'ubuntu',
     privateKey: '/path/to/privateKey.pem',
     monitoringOptions: {
-        swap: True,
-        cpu: True,
-        memory: True,
         diskSpace: ['/home/ubuntu/', '/mnt']
     }
 }];
@@ -57,7 +75,13 @@ var servers = [{
 Specify the data directory i.e. the location that the nedb database will be stored:
 
 ```javascript
-var dataFile = '/tmp/ssh-system-monitor/ssm.dat';
+exports.dataFile = '/tmp/ssh-system-monitor/ssm.dat';
+```
+
+Specify the rate at which to take data points
+
+```javascript
+exports.rate = 1000;
 ```
 
 #### SSH
@@ -65,13 +89,13 @@ var dataFile = '/tmp/ssh-system-monitor/ssm.dat';
 It's also possible to configure the maximum num. of SSH connections that can be pooled for each server and minimum num. to be maintained:
 
 ```javascript
-var poolSize = 10;
-var maintainConnections = 2;
+exports.poolSize = 10;
+exports.maintainConnections = 2;
 ```
 
 ### Analytics
 
-Once you have an nedb you can perform your own analysis or use the built in e.g.
+Once you have an nedb you can perform your own analysis or use the built in such 
 
 ```javascript
 var Nedb = require('nedb')
