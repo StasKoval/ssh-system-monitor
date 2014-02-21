@@ -5,7 +5,7 @@
 var async = require('async')
     , EventEmitter = require('events').EventEmitter
     , util = require('util')
-    , Logger = require('../config').logger
+    , Logger = require('./config').logger
     , ssh = require('./ssh')
     , _ = require('underscore');
 

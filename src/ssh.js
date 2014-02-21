@@ -5,7 +5,7 @@
 var Connection = require('ssh2');
 var Fs = require('fs');
 var Util = require('./utils');
-var Logger = require('./../config').logger;
+var Logger = require('./config').logger;
 var poolModule = require('generic-pool');
 var _ = require('underscore');
 var util = require("util");
@@ -238,7 +238,7 @@ var SSHConnectionPool = function(options) {
         max      : self.options.max,
         min      : self.options.min,
         idleTimeoutMillis : 30000,
-        log : true
+        log : false
     });
 
     this.acquire = this.pool.acquire;
@@ -250,18 +250,19 @@ SSHConnectionPool.prototype.spawnClient = function (callback) {
     var self = this;
     var client = new VisionConnection();
     client.on('ready', function() {
-        log.call(self, 'info', 'Connection ready');
+        log.call(self, 'info', 'Connection established');
         callback(null,client);
     });
     client.on('error', function(e) {
-        log.call(self, 'error', self.toString() + ':' + e);
+        log.call(self, 'error', e);
         callback(e,null);
     });
     client.on('end', function() {
-        log.call(self, 'info', 'Connection ended');
+        log.call(self, 'debug', 'Connection ended');
     });
-    client.on('close', function() {
-        log.call(self, 'info', 'Connection closed');
+    client.on('close', function(had_error) {
+        if (had_error) log.call(self, 'info', 'Connection closed due to error');
+        else log.call(self, 'info', 'Connection closed cleanly');
     });
     client.connect({
         host: this.options.host,

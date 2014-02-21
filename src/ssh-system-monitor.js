@@ -7,22 +7,24 @@ exports.init = function () {
 
     var ssh = require('./ssh')
         , Nedb = require('nedb')
-        , config = require('../config')
+        , config = require('./config')
         , historical = require('./historical')
         , Logger = config.logger
         , async = require('async')
         , _ = require('underscore');
 
+    Logger.info('Starting...');
+
     var pools = [];
     var monitors = [];
 
-    Logger.verbose('Configuring monitors');
+    Logger.debug('Configuring monitors');
     var servers = config.servers;
 
     for (var i=0;i<servers.length;i++) {
         var server = servers[i];
-        Logger.info('Configuring monitor for ' + server.name);
-        Logger.verbose('Reading private key for ' + server.name);
+        Logger.debug('Configuring monitor for ' + server.name);
+        Logger.debug('Reading private key for ' + server.name);
         processServer(server);
         server.max = config.poolSize;
         server.min = config.maintainConnections;
@@ -40,7 +42,7 @@ exports.init = function () {
 
     configureSignalHandlers();
 
-    Logger.verbose('Startup complete');
+    Logger.info('Started!');
 
 
     /**

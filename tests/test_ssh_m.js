@@ -5,7 +5,7 @@
 
 var Logger = require('../config.js').logger
     , expect = require("chai").expect
-    , serverConfig = require('../config').servers[0]
+    , serverConfig = require('../src/config').servers[0]
     , SSH = require('../src/ssh')
     , mock = require('./mock');
 
