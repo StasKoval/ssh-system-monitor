@@ -1,11 +1,14 @@
 ssh-system-monitor
 ==================
 
-A node.js application capable of monitoring multiple servers over ssh e.g. memory, cpu usage, swap usage, disk space. Information is collected into an [nedb](https://github.com/louischatriot/nedb) instance and ssh pooling is used for efficiency.
+A node.js application capable of monitoring multiple linux servers over ssh e.g. memory, cpu usage, swap usage, disk space. Information is collected into an [nedb](https://github.com/louischatriot/nedb) instance and ssh pooling is used for efficiency. It can be ran from any host, but is only capable of monitoring linux systems. 
 
 NOTE: This app has been adapted from the [clarity](https://github.com/mtford90/clarity) codebase for demonstration purposes.
 
+
+
 * [Install](#install)  
+* [Run](#run)
 * [Configuration](#configuration)  
     * [Servers](#servers)
     * [Data](#data)
@@ -25,23 +28,24 @@ Tested with node v0.10.22
 git clone https://github.com/mtford90/ssh-system-monitor .
 cd ssh-system-monitor
 npm install
-cp config.example.js config.js
 ```
 
 ### Run
 
-First modify config.js to suit your needs and then:
+First modify config.js to suit your needs (see [configuration](#configuration) section) and then:
 
 ```bash
 cd /path/to/ssh-system-monitor
 npm start
 ```
 
-Note, you can run some basic analysis on the configured database by running:
+Note, you can run some basic analysis once some stats have been collected by running:
 
 ```bash
 npm analysis
 ```
+
+This will run the demo script in the [analytics section](#analytics)
 
 ### Configuration
 
@@ -70,6 +74,8 @@ exports.servers = [{
 }];
 ```
 
+NOTE: Specifying `localhost` will attempt ssh connection to localhost as opposed to just executing the commands locally. (Obviously needs changing)
+
 #### Data
 
 Specify the data directory i.e. the location that the nedb database will be stored:
@@ -95,7 +101,7 @@ exports.maintainConnections = 2;
 
 ### Analytics
 
-Once you have an nedb you can perform your own analysis or use the built in such 
+Once you have an nedb you can perform your own analysis or use the built in e.g:
 
 ```javascript
 var Nedb = require('nedb')
@@ -145,8 +151,18 @@ analytics.memoryUsage(null, null, function(err, results) {
 
 ### Testing
 
-If `integrationTestServer` is specified in config.js, tests will be applied against that server, otherwise the SSH connections will be mocked and will instead be ran as unit tests.
+Run unit tests:
 
 ```bash
-npm test
+cd /path/to/ssh-system-monitor
+npm unit
 ```
+
+Run integration tests:
+
+```bash
+cd /path/to/ssh-system-monitor
+npm integrate
+```
+
+**Note:** integration tests will use `exports.servers` in config.js and hence these must all be valid otherwise integration tests fail.
