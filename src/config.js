@@ -31,7 +31,6 @@ var config = require('../config')
         }
     };
 
-    processServers();
 
     var Logger = new (Winston.Logger)({
         transports: [
@@ -41,6 +40,9 @@ var config = require('../config')
     });
 
     exports.logger = Logger;
+
+    processServers();
+
 
     var testType = process.env.TEST_TYPE;
     Logger.debug('TEST_TYPE=', testType);
