@@ -49,7 +49,7 @@ var config = require('../config')
         exports.integrationTestServer = null;
     }
     else {
-        if (testType == 'integration' && !exports.integrationTestServer) {
+        if (testType == 'integration' && !exports.servers.length) {
             throw 'Cant run integration tests without specifying servers in config.js=>exports.servers'
         }
         else {

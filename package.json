@@ -23,7 +23,7 @@
   "scripts": {
       "start": "node ./scripts/start.js",
       "analysis": "node ./scripts/analysis.js",
-      "test": "mocha ./tests",
+      "test": "TEST_TYPE=unit mocha ./tests",
       "unit-test": "TEST_TYPE=unit mocha ./tests",
       "integration-test": "TEST_TYPE=integration mocha ./tests"
   },

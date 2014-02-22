@@ -167,6 +167,8 @@ SSHConnection.prototype.execute = function(exec_str, callback) {
             var exitCode  = null;
             var streamEnded = false;
             var streamCLosed = false;
+            // There is no guarantee on the order of events from the stream, and we need both the exit code and the
+            // all output from the stream. Therefore force respond function be executed only once.
             var respond = _.once(function () {
                 Logger.debug(connString + '[' + exec_str + '][STDERR]: ' + stderr);
                 Logger.debug(connString + '[' + exec_str + '][STDOUT]: ' + stdout);
@@ -192,7 +194,7 @@ SSHConnection.prototype.execute = function(exec_str, callback) {
             });
             stream.on('end', function() {
                 streamEnded = true;
-                respond();
+                if (exitCode) respond();
             });
             stream.on('close', function() {
                 streamCLosed = true;
