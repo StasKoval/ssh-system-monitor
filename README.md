@@ -1,5 +1,6 @@
 ssh-system-monitor
 ==================
+![travis build status](https://travis-ci.org/mtford90/ssh-system-monitor.png?branch=master "Travis Build Status")
 
 A node.js application capable of monitoring multiple linux servers over ssh e.g. memory, cpu usage, swap usage, disk space. Information is collected into an [nedb](https://github.com/louischatriot/nedb) instance and ssh pooling is used for efficiency. It can be ran from any host, but is only capable of monitoring linux systems. 
 
@@ -156,4 +157,10 @@ Run unit tests:
 npm test
 ```
 
-**Note:** If you have servers configured in `exports.servers` in config.js, then the tests will be ran as integration tests, using those servers. So make sure they work. Otherwise everything is mocked.
+Run integration tests:
+
+```bash
+npm run-script integration-test
+```
+
+**Note:** You must add servers in config.js->`exports.servers` for integration tests to work.
