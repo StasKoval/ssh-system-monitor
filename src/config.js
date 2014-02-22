@@ -73,7 +73,13 @@ var config = require('../config')
             var server = exports.servers[i];
             _.defaults(server, exports.serverDefaults);
             if (server.hasOwnProperty('privateKey')) {
-                server.privateKey = require('fs').readFileSync(server.privateKey).toString();
+                try {
+                    server.privateKey = require('fs').readFileSync(server.privateKey).toString();
+                }
+                catch (err) {
+                    Logger.error('Unable to load private key at ' + server.privateKey,err);
+                    server.privateKey = ''; // We will try without the private key anyway. This is more for sake of TravisCI
+                }
             }
         }
     }
