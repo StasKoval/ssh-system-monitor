@@ -71,7 +71,7 @@ Analytics.prototype.memoryUsage = function (startDate, endDate, callback) {
  * @param [endDate]
  * @param [callback]
  */
-Analytics.prototype..meanCpuUsage = function (startDate, endDate, callback) {
+Analytics.prototype.meanCpuUsage = function (startDate, endDate, callback) {
     var type = statTypes.cpuUsage;
     var query = { type: type};
     if (startDate || endDate) query.date = {};

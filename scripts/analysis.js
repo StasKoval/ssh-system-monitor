@@ -4,7 +4,7 @@
 
 var Nedb = require('nedb')
     , db = new Nedb({ filename: require('../src/config').dataFile, autoload: true })
-    , analytics = require('../src/historical').Analytics(db);
+    , analytics = require('../src/analytics').Analytics(db);
 
 // Print mean CPU usage for all data points
 analytics.meanCpuUsage(null, null, function(err, result) {

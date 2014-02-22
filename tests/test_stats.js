@@ -11,7 +11,8 @@ var Logger = require('../src/config').logger
     , mock = require('./mock')
     , monitor = require('../src/monitor')
     , listener = require('../src/listener')
-    , pool = require('../src/sshPool');
+    , pool = require('../src/sshPool')
+    , analytics = require('../src/analytics');
 
 var sshConnPool;
 var statsMonitor;
@@ -148,10 +149,10 @@ describe("Statistic Collection & Analysis", function () {
 
     describe("Analytics", function () {
 
-        var analytics;
+        var a;
 
         before(function (done) {
-            analytics = new analytics.Analytics(db);
+            a = new analytics.Analytics(db);
             setTimeout(function () { // Let some stats build up in the db.
                 done();
             }, 3000);
@@ -172,7 +173,7 @@ describe("Statistic Collection & Analysis", function () {
             describe("no date specified", function () {
 
                 it("cpuUsage", function (done) {
-                    analytics.cpuUsage(null, null, function(err, results) {
+                    a.cpuUsage(null, null, function(err, results) {
                         expect(err).to.not.be.ok;
                         expect(results).to.have.length.above(0);
                         validateResults(results);
@@ -181,7 +182,7 @@ describe("Statistic Collection & Analysis", function () {
                 });
 
                 it("swapUsage", function (done) {
-                    analytics.swapUsage(null, null, function(err, results) {
+                    a.swapUsage(null, null, function(err, results) {
                         expect(err).to.not.be.ok;
                         expect(results).to.have.length.above(0);
                         validateResults(results);
@@ -190,7 +191,7 @@ describe("Statistic Collection & Analysis", function () {
                 });
 
                 it("memoryUsage", function (done) {
-                    analytics.memoryUsage(null, null, function(err, results) {
+                    a.memoryUsage(null, null, function(err, results) {
                         expect(err).to.not.be.ok;
                         expect(results).to.have.length.above(0);
                         validateResults(results);
@@ -199,7 +200,7 @@ describe("Statistic Collection & Analysis", function () {
                 });
 
                 it("meanCpuUsage", function (done) {
-                    analytics.meanCpuUsage(null, null, function (err, result) {
+                    a.meanCpuUsage(null, null, function (err, result) {
                         expect(err).to.not.be.ok;
                         expect(result).to.match(REGEX_FLOAT_OR_INT);
                         done();
@@ -218,7 +219,7 @@ describe("Statistic Collection & Analysis", function () {
 
                 before(function (done) {
                     startDate = new Date();
-                    analytics = new historical.Analytics(db);
+                    a = new analytics.Analytics(db);
                     setTimeout(function () { // Let some stats build up in the db.
                         endDate = new Date();
                         setTimeout(function () { // Let some other stats build up.
@@ -228,7 +229,7 @@ describe("Statistic Collection & Analysis", function () {
                 });
 
                 it("cpuUsage", function (done) {
-                    analytics.cpuUsage(startDate, endDate, function(err, results) {
+                    a.cpuUsage(startDate, endDate, function(err, results) {
                         expect(err).to.not.be.ok;
                         expect(results).to.have.length.above(0);
                         validateResults(results);
@@ -246,7 +247,7 @@ describe("Statistic Collection & Analysis", function () {
                 }
 
                 it("swapUsage", function (done) {
-                    analytics.swapUsage(startDate, endDate, function(err, results) {
+                    a.swapUsage(startDate, endDate, function(err, results) {
                         expect(err).to.not.be.ok;
                         expect(results).to.have.length.above(0);
                         validateResults(results);
@@ -257,7 +258,7 @@ describe("Statistic Collection & Analysis", function () {
 
 
                 it("memoryUsage", function (done) {
-                    analytics.memoryUsage(startDate, endDate, function(err, results) {
+                    a.memoryUsage(startDate, endDate, function(err, results) {
                         expect(err).to.not.be.ok;
                         expect(results).to.have.length.above(0);
                         validateResults(results);
@@ -267,7 +268,7 @@ describe("Statistic Collection & Analysis", function () {
                 });
 
                 it("meanCpuUsage", function (done) {
-                    analytics.meanCpuUsage(startDate, endDate, function (err, result) {
+                    a.meanCpuUsage(startDate, endDate, function (err, result) {
                         expect(err).to.not.be.ok;
                         expect(result).to.match(REGEX_FLOAT_OR_INT);
                         done();

@@ -4,6 +4,7 @@
 
 var sinon =  require('sinon'),
     ssh = require('../src/ssh'),
+    pool = require('../src/sshPool'),
     _ = require('underscore');
 
 
@@ -54,11 +55,11 @@ function stubSSH() {
             }, 0.2);
         });
 
-        sandbox.stub(ssh.SSHConnectionPool.prototype, 'spawnClient', function (callback) {
+        sandbox.stub(pool.SSHConnectionPool.prototype, 'spawnClient', function (callback) {
             var client = new ssh.SSHConnection();
             callback(null, client);
         });
-        sandbox.stub(ssh.SSHConnectionPool.prototype, 'destroyClient', function () {
+        sandbox.stub(pool.SSHConnectionPool.prototype, 'destroyClient', function () {
         });
 
     }

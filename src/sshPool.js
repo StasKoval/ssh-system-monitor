@@ -29,7 +29,7 @@ var SSHConnectionPool = function(options) {
         min: 2
     };
 
-    this.options = options;
+    this.options = options ? options : {};
 
     _.defaults(this.options, defaultOptions);
 
@@ -136,7 +136,9 @@ SSHConnectionPool.prototype.toString = function() {
  * @param message
  */
 function log(level, message) {
-    message = 'SSHConnectionPool[' + this.options.host + ":" + this.options.port.toString() + "] " + message;
+    var host = this.options.host;
+    var port = this.options.port ? this.options.port : "";
+    message = 'SSHConnectionPool[' + host + ":" + port.toString() + "] " + message;
     Logger.log(level, message);
 }
 
