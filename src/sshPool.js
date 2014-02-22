@@ -5,7 +5,8 @@
 var Logger = require('./config').logger
     , poolModule = require('generic-pool')
     , _ = require('underscore')
-    , ssh = require('./ssh');
+    , ssh = require('./ssh')
+    , Socket = require('net').Socket;
 
 /**
  * Provides access to pool of ssh connections with basic system inspection methods
@@ -48,11 +49,11 @@ var SSHConnectionPool = function(options) {
 SSHConnectionPool.prototype.acquire = function (callback) {
     var self = this;
     this.pool.acquire(function (err, client) {
-        if (!(client instanceof ssh.SSHConnection)) throw 'Invalid client returned';
         if (err) {
             log.call(self, 'error', 'Acquisition failed - '+err);
         }
         else {
+            if (!(client instanceof ssh.SSHConnection)) throw 'Invalid client returned';
             log.call(self, 'debug', 'Acquisition succeeded. There are now ' + self.pool.availableObjectsCount() +
                 '/' + self.pool.getPoolSize() + ' connections available.');
         }
@@ -61,7 +62,12 @@ SSHConnectionPool.prototype.acquire = function (callback) {
 };
 
 SSHConnectionPool.prototype.release = function (client) {
-    this.pool.release(client);
+    if (client) {
+        this.pool.release(client);
+    }
+    else {
+        Logger.warn('Attempted to release a null client...');
+    }
     log.call(this, 'debug', 'Release succeeded. There are now ' + this.pool.availableObjectsCount() +
         '/' + this.pool.getPoolSize() + ' connections available.');
 };
@@ -75,7 +81,7 @@ SSHConnectionPool.prototype.spawnClient = function (callback) {
     });
     client.on('error', function(e) {
         log.call(self, 'error', e);
-        callback(e,null);
+        callback(e);
     });
     client.on('end', function() {
         log.call(self, 'debug', 'Connection ended');
@@ -84,11 +90,16 @@ SSHConnectionPool.prototype.spawnClient = function (callback) {
         if (had_error) log.call(self, 'info', 'Connection closed due to error');
         else log.call(self, 'info', 'Connection closed cleanly');
     });
+//    var socket = new Socket();
+//    socket.setNoDelay(true);
+//    socket.setMaxListeners(0);
+//    socket.connect(this.options.host, this.options.port);
     client.connect({
         host: this.options.host,
         port: this.options.port,
         username: this.options.username,
         privateKey: this.options.privateKey
+//        sock: socket
     });
     return client;
 };
@@ -122,7 +133,7 @@ SSHConnectionPool.prototype.oneShot = function(callback) {
         else {
             callback('Unable to obtain an SSH client connection', null);
         }
-        self.release(client);
+        if (client) self.release(client);
     });
 };
 

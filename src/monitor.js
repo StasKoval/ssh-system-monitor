@@ -34,24 +34,27 @@ var StatsMonitor = function (sshPool, filePaths, rate) {
 //        var diskSpaceFunctions = _.map(self.filePaths, function (x) { // TODO: Can't partially apply if only one arg??
 //            return _.partial(diskSpace, x)
 //        });
-        self.intervalIdentifiers = _.map(functions, function (f) {
+        self.intervalObjects = _.map(functions, function (f) {
             return setInterval(f, self.rate);
         });
-        self.intervalIdentifiers.concat(_.map(this.filePaths, function (filePath) {
+        self.intervalObjects.concat(_.map(this.filePaths, function (filePath) {
             return setInterval(diskSpace, self.rate, filePath);
         }));
     };
 
     this.stop = function () {
         if (Logger.verbose) Logger.verbose('Stopping stats monitor');
-        _.map(self.intervalIdentifiers, function(x) {clearInterval(x)});
+        _.map(self.intervalObjects, function(x) {clearInterval(x)});
         if (Logger.verbose) Logger.verbose('Stopped stats monitor');
     };
 
     function swapUsed () {
         if (Logger.verbose) Logger.verbose('Checking swap used');
         self.sshPool.oneShot(function(err, client) {
-            if (err) self.emit('error', err);
+            if (err) {
+
+                self.emit('error', err);
+            }
             else {
                 client.swapUsedPercentage(function(err, swapUsed) {
                     if (err) self.emit('error', err);
@@ -64,7 +67,9 @@ var StatsMonitor = function (sshPool, filePaths, rate) {
     function load () { // TODO: Get current CPU rather than 1min avg.
         if (Logger.verbose) Logger.verbose('Checking avg load');
         self.sshPool.oneShot(function(err, client) {
-            if (err) self.emit('error', err);
+            if (err) {
+                self.emit('error', err);
+            }
             else {
                 client.cpuUsage(function(err, usage) {
                     if (err) self.emit('error', err);
@@ -77,7 +82,9 @@ var StatsMonitor = function (sshPool, filePaths, rate) {
     function diskSpace (path) {
         if (Logger.debug) Logger.debug('Checking disk space for ' + path);
         self.sshPool.oneShot(function(err, client) {
-            if (err) self.emit('error', err);
+            if (err) {
+                self.emit('error', err);
+            }
             else {
                 client.percentageUsed(path, function(err, usage) {
                     if (err) self.emit('error', err);
@@ -95,7 +102,9 @@ var StatsMonitor = function (sshPool, filePaths, rate) {
     function memoryUsed () {
         if (Logger.verbose) Logger.verbose('Checking memory used');
         self.sshPool.oneShot(function(err, client) {
-            if (err) self.emit('error', err);
+            if (err) {
+                self.emit('error', err);
+            }
             else {
                 client.memoryUsed(function(err, usage) {
                     if (err) self.emit('error', err);

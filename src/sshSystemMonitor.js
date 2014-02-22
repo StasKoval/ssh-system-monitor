@@ -8,7 +8,9 @@ exports.init = function () {
     var ssh = require('./ssh')
         , Nedb = require('nedb')
         , config = require('./config')
-        , historical = require('./historical')
+        , pool = require('./sshPool')
+        , monitor = require('./monitor')
+        , listener = require('./listener')
         , Logger = config.logger
         , async = require('async')
         , _ = require('underscore');
@@ -37,7 +39,7 @@ exports.init = function () {
     });
 
     Logger.debug('Configuring listener');
-    var listener = new historical.NedbStatsListener(db, monitors);
+    var statsListener = new listener.NedbStatsListener(db, monitors);
 
     configureSignalHandlers();
 
@@ -51,9 +53,9 @@ exports.init = function () {
      * @returns {{sshPool: *, statsMonitor: *}}
      */
     function constructStatsMonitor(server) {
-        var sshPool = ssh.SSHConnectionPool(server);
+        var sshPool = pool.SSHConnectionPool(server);
         pools.push(sshPool);
-        var statsMonitor = historical.StatsMonitor(sshPool, server.monitoringOptions.diskSpace, config.rate);
+        var statsMonitor = monitor.StatsMonitor(sshPool, server.monitoringOptions.diskSpace, config.rate);
         statsMonitor.start();
         monitors.push(statsMonitor);
         return {sshPool: sshPool, statsMonitor: statsMonitor};
@@ -119,7 +121,7 @@ exports.init = function () {
      */
     function constructDrainOperations() {
         return _.map(pools, function (x) {
-            return ssh.SSHConnectionPool.prototype.drain.bind(x)
+            return pool.SSHConnectionPool.prototype.drain.bind(x)
         });
     }
 
