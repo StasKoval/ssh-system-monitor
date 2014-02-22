@@ -6,7 +6,8 @@
 var Logger = require('../src/config.js').logger
     , expect = require("chai").expect
     , serverConfig = require('../src/config').servers[0]
-    , SSH = require('../src/ssh')
+    , sshPool = require('../src/sshPool')
+    , ssh = require('../src/ssh')
     , mock = require('./mock');
 
 const REGEX_FLOAT_OR_INT = /^[0-9]*([.][0-9]+)?$/;
@@ -19,7 +20,7 @@ describe('Stats', function() {
 
     before(function () {
         if (!serverConfig) mock.stubSSH();
-        pool = new SSH.SSHConnectionPool(serverConfig);
+        pool = new sshPool.SSHConnectionPool(serverConfig);
     });
 
     after(function (done) {
@@ -34,7 +35,7 @@ describe('Stats', function() {
                 expect(error).to.not.be.ok;
                 expect(data).to.be.ok;
                 Logger.info('Raw mem info: ', data);
-                var keys = Object.keys(SSH.memInfoKey);
+                var keys = Object.keys(ssh.memInfoKey);
                 for (var i=0;i<keys.length;i++) {
                     var key = keys[i];
                     Logger.debug('Testing for existence of ' + key + ' in mem info');

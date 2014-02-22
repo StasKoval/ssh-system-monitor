@@ -5,12 +5,13 @@
 
 var Logger = require('../src/config').logger
     , expect = require("chai").expect
-    , historical =  require('../src/historical')
-    , ssh = require('../src/ssh')
     , config = require('../src/config')
     , serverConfig = config.integrationTestServer
     , nedb =  require('nedb')
-    , mock = require('./mock');
+    , mock = require('./mock')
+    , monitor = require('../src/monitor')
+    , listener = require('../src/listener')
+    , pool = require('../src/sshPool');
 
 var sshConnPool;
 var statsMonitor;
@@ -20,8 +21,8 @@ const REGEX_FLOAT_OR_INT = /^[0-9]*([.][0-9]+)?$/;
 
 before(function () {
     if (!serverConfig) mock.stubSSH();
-    sshConnPool = new ssh.SSHConnectionPool(serverConfig);
-    statsMonitor = new historical.StatsMonitor(sshConnPool, ['/home/ubuntu']);
+    sshConnPool = new pool.SSHConnectionPool(serverConfig);
+    statsMonitor = new monitor.StatsMonitor(sshConnPool, ['/home/ubuntu']);
     statsMonitor.start();
 });
 
@@ -67,14 +68,14 @@ describe("Statistic Collection & Analysis", function () {
     this.timeout(6000);
 
     var db;
-    var listener;
-    var types = historical.NedbStatsListener.types;
+    var statsListener;
+    var types = config.statTypes;
 
     before(function (done) {
         Logger.debug(new Date().toString());
         Logger.info('Creating in memory db');
         db = new nedb(); // In memory nedb.
-        listener = new historical.NedbStatsListener(db, statsMonitor);
+        statsListener = new listener.NedbStatsListener(db, statsMonitor);
         Logger.debug(new Date().toString());
         done();
 
@@ -150,7 +151,7 @@ describe("Statistic Collection & Analysis", function () {
         var analytics;
 
         before(function (done) {
-            analytics = new historical.Analytics(db);
+            analytics = new analytics.Analytics(db);
             setTimeout(function () { // Let some stats build up in the db.
                 done();
             }, 3000);
@@ -188,6 +189,15 @@ describe("Statistic Collection & Analysis", function () {
                     });
                 });
 
+                it("memoryUsage", function (done) {
+                    analytics.memoryUsage(null, null, function(err, results) {
+                        expect(err).to.not.be.ok;
+                        expect(results).to.have.length.above(0);
+                        validateResults(results);
+                        done();
+                    });
+                });
+
                 it("meanCpuUsage", function (done) {
                     analytics.meanCpuUsage(null, null, function (err, result) {
                         expect(err).to.not.be.ok;
@@ -200,6 +210,7 @@ describe("Statistic Collection & Analysis", function () {
 
             describe("date specified", function () {
 
+                //noinspection JSPotentiallyInvalidUsageOfThis
                 this.timeout(12000);
 
                 var startDate;
@@ -236,6 +247,17 @@ describe("Statistic Collection & Analysis", function () {
 
                 it("swapUsage", function (done) {
                     analytics.swapUsage(startDate, endDate, function(err, results) {
+                        expect(err).to.not.be.ok;
+                        expect(results).to.have.length.above(0);
+                        validateResults(results);
+                        validateDatesOfResults(results);
+                        done();
+                    });
+                });
+
+
+                it("memoryUsage", function (done) {
+                    analytics.memoryUsage(startDate, endDate, function(err, results) {
                         expect(err).to.not.be.ok;
                         expect(results).to.have.length.above(0);
                         validateResults(results);
