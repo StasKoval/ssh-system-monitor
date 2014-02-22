@@ -87,7 +87,9 @@ var StatsMonitor = function (sshPool, filePaths, rate) {
             }
             else {
                 client.percentageUsed(path, function(err, usage) {
-                    if (err) self.emit('error', err);
+                    if (err) {
+                        self.emit('error', err);
+                    }
                     else {
                         var d = {};
                         d[path] = usage;

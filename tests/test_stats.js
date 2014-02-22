@@ -23,7 +23,7 @@ const REGEX_FLOAT_OR_INT = /^[0-9]*([.][0-9]+)?$/;
 before(function () {
     if (!serverConfig) mock.stubSSH();
     sshConnPool = new pool.SSHConnectionPool(serverConfig);
-    statsMonitor = new monitor.StatsMonitor(sshConnPool, ['/home/ubuntu']);
+    statsMonitor = new monitor.StatsMonitor(sshConnPool, ['/home/']);
     statsMonitor.start();
 });
 
@@ -38,6 +38,7 @@ describe ('StatsMonitor', function () {
             Logger.verbose("Tested emits swapUsed");
             done();
         });
+
     });
 
     it("tests emits cpuUsage", function (done) {
@@ -56,8 +57,8 @@ describe ('StatsMonitor', function () {
 
     it("tests emits diskSpaceUsed", function (done) {
         statsMonitor.once('diskSpaceUsed', function(diskSpaceUsed) {
-            expect(diskSpaceUsed).to.have.property('/home/ubuntu');
-            expect(diskSpaceUsed['/home/ubuntu']).to.match(REGEX_FLOAT_OR_INT);
+            expect(diskSpaceUsed).to.have.property('/home/');
+            expect(diskSpaceUsed['/home/']).to.match(REGEX_FLOAT_OR_INT);
             done();
         });
     });

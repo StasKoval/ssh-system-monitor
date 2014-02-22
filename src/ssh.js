@@ -72,7 +72,11 @@ SSHConnection.prototype.swapUsedPercentage = function(callback) {
             callback(err, null);
         }
         else {
-            if (callback) callback(null,info[memInfoKey.SwapFree]  / info[memInfoKey.SwapTotal]);
+            if (callback) {
+                var swapFree = info[memInfoKey.SwapFree];
+                var swapTotal = info[memInfoKey.SwapTotal];
+                callback(null, swapTotal ? swapFree  / swapTotal : 0);
+            }
         }
     })
 };
@@ -151,17 +155,54 @@ SSHConnection.prototype.memoryInfo = function (callback) {
 
 SSHConnection.prototype.execute = function(exec_str, callback) {
     var self = this;
+    var connString = this._host + ':' + this._port;
+    Logger.debug("Executing '" + exec_str + "'" + ' through ' + connString);
     self.exec(exec_str, function (err, stream) {
-        if (err && callback) callback(err);
+        if (err && callback) {
+            callback(err);
+        }
         else {
-            stream.on('data', function (data, extended) {
-                if (extended === 'stderr') {
-                    callback (data.toString(), null);
+            var stderr = "";
+            var stdout = "";
+            var exitCode  = null;
+            var streamEnded = false;
+            var streamCLosed = false;
+            var respond = _.once(function () {
+                Logger.debug(connString + '[' + exec_str + '][STDERR]: ' + stderr);
+                Logger.debug(connString + '[' + exec_str + '][STDOUT]: ' + stdout);
+                var exitWithErrorCode = exitCode > 0;
+                var noOutput = stdout.length == 0;
+                var isErrorState = exitWithErrorCode || noOutput;
+                if (isErrorState) {
+                    if (!stderr.length) stderr = 'Unknown Error (No stderr or stdout received)';
+                    if (callback) callback(stderr, null);
                 }
                 else {
-                    if (callback) callback (null, data.toString());
+                    if (callback) callback(null, stdout);
                 }
             });
+            stream.on('data', function (data, extended) {
+                var result = data.toString();
+                if (extended === 'stderr') {
+                    stderr = stderr + '\n' + result;
+                }
+                else {
+                    stdout = stdout + '\n' + result;
+                }
+            });
+            stream.on('end', function() {
+                streamEnded = true;
+                respond();
+            });
+            stream.on('close', function() {
+                streamCLosed = true;
+            });
+            stream.on('exit', function (code, signal) {
+                if (streamEnded) respond();
+            });
+
+
+
         }
     });
 };

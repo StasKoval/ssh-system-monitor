@@ -39,7 +39,6 @@ describe('Stats', function() {
                 var keys = Object.keys(ssh.memInfoKey);
                 for (var i=0;i<keys.length;i++) {
                     var key = keys[i];
-                    Logger.debug('Testing for existence of ' + key + ' in mem info');
                     expect(data).to.have.ownProperty(key);
                 }
                 done();
@@ -96,7 +95,7 @@ describe('Stats', function() {
         pool.oneShot(function(err, client) {
             expect(err).to.not.be.ok;
             expect(client).to.be.ok;
-            client.percentageUsed('/home/ubuntu', function (error, percentageUsed) {
+            client.percentageUsed('/home/', function (error, percentageUsed) {
                 expect(error).to.not.be.ok;
                 Logger.info('percentageUsed: ', percentageUsed);
                 expect(percentageUsed).to.match(REGEX_FLOAT_OR_INT);
@@ -109,7 +108,7 @@ describe('Stats', function() {
         pool.oneShot(function(err, client) {
             expect(err).to.not.be.ok;
             expect(client).to.be.ok;
-            client.percentageFree('/home/ubuntu', function (error, percentageFree) {
+            client.percentageFree('/home/', function (error, percentageFree) {
                 expect(error).to.not.be.ok;
                 Logger.info('percentageFree: ', percentageFree);
                 expect(percentageFree).to.match(REGEX_FLOAT_OR_INT);
