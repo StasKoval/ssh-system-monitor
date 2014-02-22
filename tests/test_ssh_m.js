@@ -13,6 +13,8 @@ const REGEX_FLOAT_OR_INT = /^[0-9]*([.][0-9]+)?$/;
 
 describe('Stats', function() {
 
+    this.timeout(6000);
+
     var pool;
 
     before(function () {

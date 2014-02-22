@@ -27,9 +27,13 @@ before(function () {
 
 describe ('StatsMonitor', function () {
 
+    this.timeout(6000);
+
     it("tests emits swapUsed", function (done) {
+        Logger.verbose("Testing emits swapUsed");
         statsMonitor.once('swapUsed', function(cpuUsage) {
             expect(cpuUsage).to.match(REGEX_FLOAT_OR_INT);
+            Logger.verbose("Tested emits swapUsed");
             done();
         });
     });
@@ -60,18 +64,20 @@ describe ('StatsMonitor', function () {
 
 describe("Statistic Collection & Analysis", function () {
 
+    this.timeout(6000);
+
     var db;
     var listener;
     var types = historical.NedbStatsListener.types;
 
-    before(function () {
+    before(function (done) {
+        Logger.debug(new Date().toString());
         Logger.info('Creating in memory db');
         db = new nedb(); // In memory nedb.
         listener = new historical.NedbStatsListener(db, statsMonitor);
-    });
+        Logger.debug(new Date().toString());
+        done();
 
-    after(function () {
-        listener.stop();
     });
 
     describe("NedbStatsListener", function () {
@@ -193,6 +199,8 @@ describe("Statistic Collection & Analysis", function () {
             });
 
             describe("date specified", function () {
+
+                this.timeout(12000);
 
                 var startDate;
                 var endDate;

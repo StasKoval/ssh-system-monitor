@@ -233,7 +233,7 @@ var SSHConnectionPool = function(options) {
 
     this.pool = poolModule.Pool({
         name     : 'ssh',
-        create   : _.bind(this.spawnClient, self), // For some reason this bind is neccessary. Why?
+        create   : _.bind(this.spawnClient, self),
         destroy  : _.bind(this.destroyClient, self),
         max      : self.options.max,
         min      : self.options.min,
@@ -241,9 +241,27 @@ var SSHConnectionPool = function(options) {
         log : false
     });
 
-    this.acquire = this.pool.acquire;
-    this.release = this.pool.release;
+};
 
+SSHConnectionPool.prototype.acquire = function (callback) {
+    var self = this;
+    this.pool.acquire(function (err, client) {
+        if (!(client instanceof VisionConnection)) throw 'Invalid client returned';
+        if (err) {
+            log.call(self, 'error', 'Acquisition failed - '+err);
+        }
+        else {
+            log.call(self, 'debug', 'Acquisition succeeded. There are now ' + self.pool.availableObjectsCount() +
+                '/' + self.pool.getPoolSize() + ' connections available.');
+        }
+        callback(err, client);
+    });
+};
+
+SSHConnectionPool.prototype.release = function (client) {
+    this.pool.release(client);
+    log.call(this, 'debug', 'Release succeeded. There are now ' + this.pool.availableObjectsCount() +
+        '/' + this.pool.getPoolSize() + ' connections available.');
 };
 
 SSHConnectionPool.prototype.spawnClient = function (callback) {
