@@ -73,7 +73,7 @@ var NedbStatsListener = function (db) {
                     Logger.error('Error inserting cpu usage into nedb');
                 }
                 else {
-                    Logger.debug('Created cpuUsage object with id', newObj._id);
+                    Logger.trace('Created cpuUsage object with id', newObj._id);
                 }
             });
         });
@@ -90,7 +90,7 @@ var NedbStatsListener = function (db) {
                     Logger.error('Error inserting memory usage into nedb');
                 }
                 else {
-                    Logger.debug('Created memoryUsed object with id', newObj._id);
+                    Logger.trace('Created memoryUsed object with id', newObj._id);
                 }
             });
         });
@@ -107,7 +107,7 @@ var NedbStatsListener = function (db) {
                     Logger.error('Error inserting swap used into nedb');
                 }
                 else {
-                    Logger.debug('Created swapused object with id', newObj._id);
+                    Logger.trace('Created swapused object with id', newObj._id);
                 }
             });
         });
@@ -126,7 +126,7 @@ var NedbStatsListener = function (db) {
                         Logger.error('Error inserting swap used into nedb');
                     }
                     else {
-                        Logger.debug('Created diskSpaceUsed object with id', newObj._id);
+                        Logger.trace('Created diskSpaceUsed object with id', newObj._id);
                     }
                 });
             }
