@@ -33,8 +33,33 @@ var config = require('../config')
 
 
     var Logger = new (Winston.Logger)({
+        levels: {
+            trace: 0,
+            verbose: 1,
+            debug: 2,
+            info: 3,
+            warn: 4,
+            error: 5,
+            fatal: 6
+        },
+        colors: {
+            trace: 'grey',
+            verbose: 'white',
+            debug: 'green',
+            info: 'green',
+            warn: 'yellow',
+            error: 'red',
+            fatal: 'red'
+        },
         transports: [
-            new (Winston.transports.Console)({ json: false, timestamp: true, level: exports.logLevel })
+            new (Winston.transports.Console)({
+                json: false,
+                timestamp: true,
+                level: exports.logLevel,
+                prettyPrint: true,
+                colorize: true,
+                silent: false
+            })
         ],
         exitOnError: false
     });

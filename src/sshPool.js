@@ -98,7 +98,8 @@ SSHConnectionPool.prototype.spawnClient = function (callback) {
         host: this.options.host,
         port: this.options.port,
         username: this.options.username,
-        privateKey: this.options.privateKey
+        privateKey: this.options.privateKey,
+        password: this.options.password
 //        sock: socket
     });
     return client;
