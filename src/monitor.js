@@ -104,7 +104,7 @@ var StatsMonitor = function (sshPool, filePaths, rate) {
     }
 
     function diskSpace (path, callback) {
-        if (Logger.debug) Logger.debug('Checking disk space for ' + path);
+        if (Logger.verbose) Logger.verbose('Checking disk space for ' + path);
         self.sshPool.oneShot(function(err, client) {
             if (err) {
                 self.emit('error', err);

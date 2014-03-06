@@ -156,7 +156,6 @@ SSHConnection.prototype.memoryInfo = function (callback) {
 SSHConnection.prototype.execute = function(exec_str, callback) {
     var self = this;
     var connString = this._host + ':' + this._port;
-    Logger.debug("Executing '" + exec_str + "'" + ' through ' + connString);
     self.exec(exec_str, function (err, stream) {
         if (err && callback) {
             callback(err);
@@ -170,8 +169,10 @@ SSHConnection.prototype.execute = function(exec_str, callback) {
             // There is no guarantee on the order of events from the stream, and we need both the exit code and the
             // all output from the stream. Therefore force respond function be executed only once.
             var respond = _.once(function () {
-                Logger.debug(connString + '[' + exec_str + '][STDERR]: ' + stderr);
-                Logger.debug(connString + '[' + exec_str + '][STDOUT]: ' + stdout);
+                if (Logger.trace) {
+                    Logger.trace(connString + '[' + exec_str + '][STDERR]: ' + stderr);
+                    Logger.trace(connString + '[' + exec_str + '][STDOUT]: ' + stdout);
+                }
                 var exitWithErrorCode = exitCode > 0;
                 var noOutput = stdout.length == 0;
                 var isErrorState = exitWithErrorCode || noOutput;
