@@ -54,7 +54,7 @@ SSHConnectionPool.prototype.acquire = function (callback) {
         }
         else {
             if (!(client instanceof ssh.SSHConnection)) throw 'Invalid client returned';
-            log.call(self, 'verbose', 'Acquisition succeeded. There are now ' + self.pool.availableObjectsCount() +
+            log.call(self, 'trace', 'Acquisition succeeded. There are now ' + self.pool.availableObjectsCount() +
                 '/' + self.pool.getPoolSize() + ' connections available.');
         }
         callback(err, client);
@@ -68,7 +68,7 @@ SSHConnectionPool.prototype.release = function (client) {
     else {
         Logger.warn('Attempted to release a null client...');
     }
-    log.call(this, 'verbose', 'Release succeeded. There are now ' + this.pool.availableObjectsCount() +
+    log.call(this, 'trace', 'Release succeeded. There are now ' + this.pool.availableObjectsCount() +
         '/' + this.pool.getPoolSize() + ' connections available.');
 };
 
