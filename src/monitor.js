@@ -31,36 +31,14 @@ var StatsMonitor = function (sshPool, filePaths, rate) {
 
     var executing = [];
 
-    var apply = function (f) {
-        var funcName;
-        if (_.indexOf(executing, f) == -1) {
-            if (Logger.verbose) {
-                funcName = functionName(f);
-                Logger.verbose('Executing ' + funcName);
-            }
-            executing.push(f);
-            f(function () {
-                Logger.fatal('howdy');
-                var i = _.indexOf(executing, f);
-                executing.splice(i, 1);
-            });
-        }
-        else {
-            if (Logger.verbose) {
-                funcName = functionName(f);
-                Logger.verbose('Attempted to execute ' + funcName + ' but its already running');
-            }
-        }
-    };
-
     this.start = function () {
         var functions = [swapUsed, load, memoryUsed];
-        functions = functions.concat(_.map(this.filePaths, _.partial(_.partial, diskSpace)));
-        functions = _.map(functions, function (f) {
-            return _.partial(apply, f);
+        self.intervalObjects = _.map(functions, function (f) {
+            return setInterval(f, self.rate);
         });
-        var f = _.partial(setInterval, _, self.rate);
-        self.intervalObjects = _.map(functions, f);
+        self.intervalObjects.concat(_.map(this.filePaths, function (filePath) {
+            return setInterval(diskSpace, self.rate, filePath);
+        }));
     };
 
     this.stop = function () {
@@ -69,46 +47,41 @@ var StatsMonitor = function (sshPool, filePaths, rate) {
         if (Logger.verbose) Logger.verbose('Stopped stats monitor');
     };
 
-    function swapUsed (callback) {
+    function swapUsed () {
         if (Logger.verbose) Logger.verbose('Checking swap used');
         self.sshPool.oneShot(function(err, client) {
             if (err) {
                 self.emit('error', err);
-                callback(err);
             }
             else {
                 client.swapUsedPercentage(function(err, swapUsed) {
                     if (err) self.emit('error', err);
                     else self.emit('swapUsed', swapUsed);
-                    callback(err);
                 })
             }
         })
     }
 
-    function load (callback) { // TODO: Get current CPU rather than 1min avg.
+    function load () { // TODO: Get current CPU rather than 1min avg.
         if (Logger.verbose) Logger.verbose('Checking avg load');
         self.sshPool.oneShot(function(err, client) {
             if (err) {
                 self.emit('error', err);
-                callback(err);
             }
             else {
                 client.cpuUsage(function(err, usage) {
                     if (err) self.emit('error', err);
                     else self.emit('cpuUsage', usage);
-                    callback(err);
                 });
             }
         });
     }
 
-    function diskSpace (path, callback) {
+    function diskSpace (path) {
         if (Logger.verbose) Logger.verbose('Checking disk space for ' + path);
         self.sshPool.oneShot(function(err, client) {
             if (err) {
                 self.emit('error', err);
-                callback(err);
             }
             else {
                 client.percentageUsed(path, function(err, usage) {
@@ -121,18 +94,16 @@ var StatsMonitor = function (sshPool, filePaths, rate) {
                         if (Logger.verbose) Logger.verbose('Emitting disk space used');
                         self.emit('diskSpaceUsed', d);
                     }
-                    callback(err);
                 });
             }
         });
     }
 
-    function memoryUsed (callback) {
+    function memoryUsed () {
         if (Logger.verbose) Logger.verbose('Checking memory used');
         self.sshPool.oneShot(function(err, client) {
             if (err) {
                 self.emit('error', err);
-                callback(err);
             }
             else {
                 client.memoryUsed(function(err, usage) {
@@ -141,7 +112,6 @@ var StatsMonitor = function (sshPool, filePaths, rate) {
                         if (Logger.verbose) Logger.verbose('Emitting memory used');
                         self.emit('memoryUsed', usage);
                     }
-                    callback(err);
                 });
             }
         });
