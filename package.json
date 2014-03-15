@@ -14,7 +14,8 @@
     "ssh2": "~0.2.17",
     "underscore": "~1.6.0",
     "sinon": "~1.8.2",
-    "winston": "~0.7.2"
+    "winston": "~0.7.2",
+    "exec-sync": "0.1.6"
   },
   "devDependencies": {
     "mocha": "~1.17.1",
@@ -25,7 +26,8 @@
       "analysis": "node ./scripts/analysis.js",
       "test": "TEST_TYPE=unit mocha ./tests",
       "unit-test": "TEST_TYPE=unit mocha ./tests",
-      "integration-test": "TEST_TYPE=integration mocha ./tests"
+      "integration-test": "TEST_TYPE=integration mocha ./tests",
+      "dump-packages": "node ./scripts/dumpPackages.js"
   },
   "repository": {
     "type": "git",
