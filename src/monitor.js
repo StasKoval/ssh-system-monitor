@@ -29,9 +29,9 @@ var StatsMonitor = function (sshPool, filePaths, rate) {
         this.rate = 1000; // Every second
     }
 
-    var executing = [];
-
     this.start = function () {
+        // TODO: Partial application (taking into account variable arguments also...)
+        // TODO: Remove functions variable, place all functions in an object instead
         var functions = [swapUsed, load, memoryUsed];
         self.intervalObjects = _.map(functions, function (f) {
             return setInterval(f, self.rate);
