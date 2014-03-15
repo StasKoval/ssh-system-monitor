@@ -24,10 +24,8 @@
   "scripts": {
       "start": "node ./scripts/start.js",
       "analysis": "node ./scripts/analysis.js",
-      "test": "TEST_TYPE=unit mocha ./tests",
-      "unit-test": "TEST_TYPE=unit mocha ./tests",
-      "integration-test": "TEST_TYPE=integration mocha ./tests",
-      "dump-packages": "node ./scripts/dumpPackages.js"
+      "test": "mocha ./tests/unit",
+      "integration-test": "mocha ./tests/integration"
   },
   "repository": {
     "type": "git",

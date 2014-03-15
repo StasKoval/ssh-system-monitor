@@ -68,23 +68,6 @@ var config = require('../config')
 
     processServers();
 
-
-    var testType = process.env.TEST_TYPE;
-    Logger.debug('TEST_TYPE=', testType);
-    if (testType == 'unit') {
-        Logger.debug('Running as unit tests due as explicitly specified');
-        exports.integrationTestServer = null;
-    }
-    else {
-        if (testType == 'integration' && !exports.servers.length) {
-            throw 'Cant run integration tests without specifying servers in config.js=>exports.servers'
-        }
-        else {
-            exports.integrationTestServer = exports.servers.length ? exports.servers[0] : null;
-            if (exports.integrationTestServer) Logger.debug('Running as integration tests');
-        }
-    }
-
     exports.statTypes = {
         cpuUsage: 'cpuUsage',
         swapUsed: 'swapUsed',

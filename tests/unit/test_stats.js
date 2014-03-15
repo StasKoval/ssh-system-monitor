@@ -3,16 +3,15 @@
  */
 /*global describe, it, before, beforeEach, after, afterEach */
 
-var Logger = require('../src/config').logger
+var Logger = require('../../src/config').logger
     , expect = require("chai").expect
-    , config = require('../src/config')
-    , serverConfig = config.integrationTestServer
+    , config = require('../../src/config')
     , nedb =  require('nedb')
     , mock = require('./mock')
-    , monitor = require('../src/monitor')
-    , listener = require('../src/listener')
-    , pool = require('../src/sshPool')
-    , analytics = require('../src/analytics');
+    , monitor = require('../../src/monitor')
+    , listener = require('../../src/listener')
+    , pool = require('../../src/pool')
+    , analytics = require('../../src/analytics');
 
 var sshConnPool;
 var statsMonitor;
@@ -21,8 +20,8 @@ const REGEX_FLOAT_OR_INT = /^[0-9]*([.][0-9]+)?$/;
 
 
 before(function () {
-    if (!serverConfig) mock.stubSSH();
-    sshConnPool = new pool.SSHConnectionPool(serverConfig);
+    mock.stubSSH();
+    sshConnPool = new pool.SSHConnectionPool({});
     statsMonitor = new monitor.StatsMonitor(sshConnPool, ['/home/']);
     statsMonitor.start();
 });

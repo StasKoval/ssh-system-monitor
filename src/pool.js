@@ -5,9 +5,7 @@
 var Logger = require('./config').logger
     , poolModule = require('generic-pool')
     , _ = require('underscore')
-    , ssh = require('./ssh')
-    , Socket = require('net').Socket;
-
+    , ssh = require('./ssh');
 /**
  * Provides access to pool of ssh connections with basic system inspection methods
  * @param options
@@ -23,7 +21,7 @@ var SSHConnectionPool = function(options) {
     // The below specifies available options
     var defaultOptions = {
         host: '',
-        port: null,
+        port: 22,
         username: '',
         privateKey: null,
         max: 10,

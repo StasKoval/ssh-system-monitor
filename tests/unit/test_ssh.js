@@ -3,12 +3,11 @@
  */
 /* global describe, it, before, beforeEach, after, afterEach */
 
-var Logger = require('../src/config.js').logger
+var Logger = require('../../src/config.js').logger
     , expect = require("chai").expect
-    , config = require('../src/config')
-    , serverConfig = config.integrationTestServer
-    , sshPool = require('../src/sshPool')
-    , ssh = require('../src/ssh')
+    , config = require('../../src/config')
+    , sshPool = require('../../src/pool')
+    , ssh = require('../../src/ssh')
     , mock = require('./mock');
 
 const REGEX_FLOAT_OR_INT = /^[0-9]*([.][0-9]+)?$/;
@@ -20,8 +19,8 @@ describe('Stats', function() {
     var pool;
 
     before(function () {
-        if (!serverConfig) mock.stubSSH();
-        pool = new sshPool.SSHConnectionPool(serverConfig);
+        mock.stubSSH();
+        pool = new sshPool.SSHConnectionPool({});
     });
 
     after(function (done) {

@@ -3,8 +3,8 @@
  */
 
 var sinon =  require('sinon'),
-    ssh = require('../src/ssh'),
-    pool = require('../src/sshPool'),
+    ssh = require('../../src/ssh'),
+    pool = require('../../src/pool'),
     _ = require('underscore');
 
 
@@ -32,6 +32,7 @@ function stubSSH() {
 
         sandbox = sinon.sandbox.create();
 
+        sandbox.stub(ssh.SSHConnection.prototype, 'connect',  sinon.stub().returns(undefined));
         sandbox.stub(ssh.SSHConnection.prototype, 'swapUsedPercentage', _.partial(successfulCallback, 0.83, 0.2));
 //    sandbox.stub(ssh.SSHConnection.prototype, 'swapUsedPercentage', _.partial(successfulCallback, 0.83, 0.2));
         sandbox.stub(ssh.SSHConnection.prototype, 'memoryUsed', _.partial(successfulCallback, 0.83, 0.2));
