@@ -5,9 +5,9 @@
 
 var exec = require('exec-sync');
 
-identityFileConfig = 'vagrant ssh-config precise64 | grep IdentityFile'
-privateKey = exec(identityFileConfig).split(' ').slice(-1).pop()
-username = 'vagrant'
+identityFileConfig = 'vagrant ssh-config precise64 | grep IdentityFile';
+privateKey = exec(identityFileConfig).split(' ').slice(-1).pop();
+username = 'vagrant';
 
 exports.servers = [{
     name: 'precise64',

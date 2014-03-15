@@ -20,12 +20,8 @@ function System(config) {
     this._pools = [];
     this._monitors = [];
     this._listeners = [];
-    this._config = config;
-    logger.info('Configuring database at ' + self._config.dataFile);
-    this._db = new Nedb({
-        filename: self._config.dataFile,
-        autoload: true
-    });
+    this._config = undefined;
+    this._db = undefined;
 
     this._constructStatsMonitor = function(server) {
         var sshPool = pool.SSHConnectionPool(server);
@@ -59,7 +55,12 @@ function System(config) {
         });
     };
 
-    this.start = function (callback) {
+    this.start = function (config) {
+        self._config = config;
+        self._db = new Nedb({
+            filename: self._config.dataFile,
+            autoload: true
+        });
         logger.debug('Configuring monitors');
         var servers = self._config.servers;
         for (var i=0;i<servers.length;i++) {
@@ -73,7 +74,6 @@ function System(config) {
         logger.debug('Configuring listener');
         self._listeners.push(new listener.NedbStatsListener(self._db, self._monitors));
         logger.info('Started!');
-        if (callback) callback();
     };
 
     this.terminate = function(callback) {
@@ -89,4 +89,4 @@ function System(config) {
 
 }
 
-module.exports = new System(config);
+module.exports = new System();

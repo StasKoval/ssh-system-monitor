@@ -16,6 +16,8 @@ var Logger = require('../../src/config').logger
 var sshConnPool;
 var statsMonitor;
 
+config.rate = 300;
+
 const REGEX_FLOAT_OR_INT = /^[0-9]*([.][0-9]+)?$/;
 
 

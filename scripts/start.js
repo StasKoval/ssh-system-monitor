@@ -6,7 +6,7 @@ var system = require('../src/system')
     , config = require('../src/config')
     , logger = config.logger;
 
-system.start();
+system.start(config);
 
 process.on('SIGINT', function () {
     logger.info('Received SIGINT');
