@@ -55,12 +55,15 @@ function System(config) {
         });
     };
 
-    this.start = function (config) {
+    this.start = function (config, db) {
         self._config = config;
-        self._db = new Nedb({
-            filename: self._config.dataFile,
-            autoload: true
-        });
+        self._db = db;
+        if (!db) {
+            self._db = new Nedb({
+                filename: self._config.dataFile,
+                autoload: true
+            });
+        }
         logger.debug('Configuring monitors');
         var servers = self._config.servers;
         for (var i=0;i<servers.length;i++) {

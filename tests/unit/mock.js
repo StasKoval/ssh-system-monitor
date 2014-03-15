@@ -34,7 +34,6 @@ function stubSSH() {
 
         sandbox.stub(ssh.SSHConnection.prototype, 'connect',  sinon.stub().returns(undefined));
         sandbox.stub(ssh.SSHConnection.prototype, 'swapUsedPercentage', _.partial(successfulCallback, 0.83, 0.2));
-//    sandbox.stub(ssh.SSHConnection.prototype, 'swapUsedPercentage', _.partial(successfulCallback, 0.83, 0.2));
         sandbox.stub(ssh.SSHConnection.prototype, 'memoryUsed', _.partial(successfulCallback, 0.83, 0.2));
         sandbox.stub(ssh.SSHConnection.prototype, 'cpuUsage', _.partial(successfulCallback, 0.83, 0.2));
         sandbox.stub(ssh.SSHConnection.prototype, 'averageLoad', _.partial(successfulCallback, {
@@ -64,7 +63,6 @@ function stubSSH() {
         });
 
     }
-
 
 }
 
