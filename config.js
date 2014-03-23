@@ -19,11 +19,6 @@ exports.servers = [{
     host: '192.168.50.3',
     username: username,
     privateKey: privateKey
-},{
-    name: 'centos64',
-    host: '192.168.50.5',
-    username: username,
-    privateKey: privateKey
 }];
 
 exports.dataFile = '/tmp/ssh-system-monitor/ssm.dat';
