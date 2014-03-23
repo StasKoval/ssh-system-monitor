@@ -98,6 +98,10 @@ var config = require('../config')
         memoryUsed: 'memoryUsed'
     };
 
+    exports.timeouts = {
+        acquisition: 500
+    };
+
     /**
      * Merge with the default server options and read any private key files.
      */

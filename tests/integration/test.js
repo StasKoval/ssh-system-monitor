@@ -89,10 +89,14 @@ describe('Integration Tests', function () {
 
 });
 
-
 process.on('SIGINT', function () {
     logger.info('Received SIGINT');
     system.terminate(function () {
-        process.exit(0);
+        db.find({}, function(err, docs) {
+            if (docs.length) {
+                analyseDocuments(docs);
+            }
+            process.exit(0);
+        });
     })
 });

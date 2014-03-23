@@ -2,7 +2,8 @@
  * Created by mtford on 22/02/2014.
  */
 
-var Logger = require('./config').logger
+var config = require('./config')
+    , Logger = require('./config').logger
     , poolModule = require('generic-pool')
     , _ = require('underscore')
     , ssh = require('./ssh');
@@ -36,6 +37,7 @@ var SSHConnectionPool = function(options) {
         name     : 'ssh',
         create   : _.bind(this.spawnClient, self),
         destroy  : _.bind(this.destroyClient, self),
+//        validate : _.bind(this.validate, self),
         max      : self.options.max,
         min      : self.options.min,
         idleTimeoutMillis : 30000,
@@ -46,10 +48,17 @@ var SSHConnectionPool = function(options) {
 
 SSHConnectionPool.prototype.acquire = function (callback) {
     var self = this;
+    var tp = setTimeout(function () {
+        tp = null;
+        var message = 'Acquisition timed out';
+        if (Logger.debug) {
+            Logger.error(self.logMessage(message))
+        }
+        if (callback) callback(message);
+    }, config.timeouts.acquisition);
     this.pool.acquire(function (err, client) {
         if (err) {
             Logger.error(self.logMessage('Acquisition failed - '+err));
-
         }
         else {
             if (!(client instanceof ssh.SSHConnection)) throw 'Invalid client returned';
@@ -59,7 +68,10 @@ SSHConnectionPool.prototype.acquire = function (callback) {
                 Logger.verbose(self.logMessage(message));
             }
         }
-        callback(err, client);
+        if (tp) {
+            clearTimeout(tp);
+            callback(err, client);
+        }
     });
 };
 
@@ -109,6 +121,10 @@ SSHConnectionPool.prototype.spawnClient = function (callback) {
     });
     return client;
 };
+
+//SSHConnectionPool.prototype.validate = function (client) {
+//    return client._state != 'closed'; // Connection will be destroyed if not open. Allows for error recovery.
+//};
 
 SSHConnectionPool.prototype.destroyClient = function (client) {
     client.end();
