@@ -30,4 +30,4 @@ exports.dataFile = '/tmp/ssh-system-monitor/ssm.dat';
 exports.rate = 1000;
 exports.poolSize = 10;
 exports.maintainConnections = 2;
-exports.logLevel = 'info';
+exports.logLevel = 'trace';

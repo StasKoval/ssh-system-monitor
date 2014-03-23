@@ -109,7 +109,6 @@ SSHConnection.prototype.averageLoad = function (callback) {
         if (err) callback(err, data);
         else {
             var averages = data.split('load average:');
-            Logger.debug(averages);
             averages = averages[averages.length-1].trim().split(' ');
             averages = {
                 1: parseFloat(averages[0]),
@@ -154,6 +153,8 @@ SSHConnection.prototype.memoryInfo = function (callback) {
 };
 
 SSHConnection.prototype.execute = function(exec_str, callback) {
+    var start = null;
+    if (Logger.trace) start = new Date().getTime();
     var self = this;
     var connString = this._host + ':' + this._port;
     self.exec(exec_str, function (err, stream) {
@@ -169,9 +170,9 @@ SSHConnection.prototype.execute = function(exec_str, callback) {
             // There is no guarantee on the order of events from the stream, and we need both the exit code and the
             // all output from the stream. Therefore force respond function be executed only once.
             var respond = _.once(function () {
-                if (Logger.trace) {
-                    Logger.trace(connString + '[' + exec_str + '][STDERR]: ' + stderr);
-                    Logger.trace(connString + '[' + exec_str + '][STDOUT]: ' + stdout);
+                if (Logger.verbose) {
+                    Logger.verbose(connString + '[' + exec_str + '][STDERR]: ' + stderr);
+                    Logger.verbose(connString + '[' + exec_str + '][STDOUT]: ' + stdout);
                 }
                 var exitWithErrorCode = exitCode > 0;
                 var noOutput = stdout.length == 0;
@@ -182,6 +183,11 @@ SSHConnection.prototype.execute = function(exec_str, callback) {
                 }
                 else {
                     if (callback) callback(null, stdout);
+                }
+                if (Logger.trace) {
+                    var end = new Date().getTime();
+                    var time = end - start;
+                    Logger.trace("Executing '" + exec_str + "' on " + connString + " took " + time.toString() + "ms");
                 }
             });
             stream.on('data', function (data, extended) {
@@ -203,9 +209,6 @@ SSHConnection.prototype.execute = function(exec_str, callback) {
             stream.on('exit', function (code, signal) {
                 if (streamEnded) respond();
             });
-
-
-
         }
     });
 };

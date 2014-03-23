@@ -48,12 +48,16 @@ SSHConnectionPool.prototype.acquire = function (callback) {
     var self = this;
     this.pool.acquire(function (err, client) {
         if (err) {
-            log.call(self, 'error', 'Acquisition failed - '+err);
+            Logger.error(logMessage('Acquisition failed - '+err));
+
         }
         else {
             if (!(client instanceof ssh.SSHConnection)) throw 'Invalid client returned';
-            log.call(self, 'trace', 'Acquisition succeeded. There are now ' + self.pool.availableObjectsCount() +
-                '/' + self.pool.getPoolSize() + ' connections available.');
+            if (Logger.verbose) {
+                var message = 'Acquisition succeeded. There are now ' + self.pool.availableObjectsCount() +
+                    '/' + self.pool.getPoolSize() + ' connections available.';
+                Logger.verbose(logMessage(message));
+            }
         }
         callback(err, client);
     });
@@ -66,7 +70,7 @@ SSHConnectionPool.prototype.release = function (client) {
     else {
         Logger.warn('Attempted to release a null client...');
     }
-    log.call(this, 'trace', 'Release succeeded. There are now ' + this.pool.availableObjectsCount() +
+    log.call(this, 'verbose', 'Release succeeded. There are now ' + this.pool.availableObjectsCount() +
         '/' + this.pool.getPoolSize() + ' connections available.');
 };
 
@@ -145,11 +149,11 @@ SSHConnectionPool.prototype.toString = function() {
  * @param level
  * @param message
  */
-function log(level, message) {
+function logMessage(message) {
     var host = this.options.host;
     var port = this.options.port ? this.options.port : "";
     message = 'SSHConnectionPool[' + host + ":" + port.toString() + "] " + message;
-    Logger.log(level, message);
+    return message;
 }
 
 exports.SSHConnectionPool = SSHConnectionPool;

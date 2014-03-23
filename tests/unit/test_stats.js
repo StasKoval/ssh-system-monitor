@@ -75,13 +75,10 @@ describe("Statistic Collection & Analysis", function () {
     var types = config.statTypes;
 
     before(function (done) {
-        Logger.debug(new Date().toString());
         Logger.info('Creating in memory db');
         db = new nedb(); // In memory nedb.
         statsListener = new listener.NedbStatsListener(db, statsMonitor);
-        Logger.debug(new Date().toString());
         done();
-
     });
 
     describe("NedbStatsListener", function () {
