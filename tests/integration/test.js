@@ -57,13 +57,13 @@ describe('Integration Tests', function () {
      */
 
     var db = new Nedb();
-    var testLength = 5000;
-
-    this.timeout(testLength * 2);
+    var testLength = 60000;
 
     before(function () {
         system.start(config, db);
     });
+
+    this.timeout(testLength*2);
 
     it("should have something in the database", function (done) {
         setTimeout(function() {

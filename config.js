@@ -5,18 +5,23 @@
 
 var exec = require('exec-sync');
 
-identityFileConfig = 'vagrant ssh-config precise64 | grep IdentityFile';
+identityFileConfig = 'vagrant ssh-config one | grep IdentityFile';
 privateKey = exec(identityFileConfig).split(' ').slice(-1).pop();
 username = 'vagrant';
 
 exports.servers = [{
-    name: 'precise64',
+    name: 'one',
     host: '192.168.50.2',
     username: username,
     privateKey: privateKey
 },{
-    name: 'debian64',
+    name: 'two',
     host: '192.168.50.3',
+    username: username,
+    privateKey: privateKey
+},{
+    name: 'three',
+    host: '192.168.50.4',
     username: username,
     privateKey: privateKey
 }];
