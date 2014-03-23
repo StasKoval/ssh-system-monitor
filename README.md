@@ -4,7 +4,6 @@ ssh-system-monitor
 
 A node.js application capable of monitoring multiple linux servers over ssh e.g. memory, cpu usage, swap usage, disk space. Information is collected into an [nedb](https://github.com/louischatriot/nedb) instance and ssh pooling is used for efficiency. It can be ran from any host, but is only capable of monitoring linux systems. 
 
-NOTE: This app has been adapted from the [clarity](https://github.com/mtford90/clarity) codebase for demonstration purposes.
 
 
 
