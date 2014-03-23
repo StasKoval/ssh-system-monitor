@@ -151,16 +151,18 @@ analytics.memoryUsage(null, null, function(err, results) {
 
 ### Testing
 
-Run unit tests:
+#### Unit Tests
 
 ```bash
 npm test
 ```
 
-Run integration tests:
+#### Integration Tests
+
+The integration tests will use servers specified in config.js. The `Vagrantfile` specifies some basic servers that can be used as part of this.
 
 ```bash
+vagrant up # Optional
 npm run-script integration-test
 ```
 
-**Note:** You must add servers in config.js->`exports.servers` for integration tests to work.
