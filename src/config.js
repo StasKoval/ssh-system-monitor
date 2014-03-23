@@ -63,8 +63,6 @@ var config = require('../config')
         exitOnError: false
     });
 
-
-
     _.each(Object.keys(Logger.levels), function(level) {
         var oldLogger = Logger[level];
         Logger[level] = function (msg) {

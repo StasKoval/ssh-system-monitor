@@ -48,7 +48,7 @@ var StatsMonitor = function (sshPool, filePaths, rate) {
     };
 
     function swapUsed () {
-        if (Logger.verbose) Logger.verbose('Checking swap used');
+        if (Logger.trace) Logger.trace(logMessage('Executing swapUsed'));
         self.sshPool.oneShot(function(err, client) {
             if (err) {
                 self.emit('error', err);
@@ -63,7 +63,7 @@ var StatsMonitor = function (sshPool, filePaths, rate) {
     }
 
     function load () { // TODO: Get current CPU rather than 1min avg.
-        if (Logger.verbose) Logger.verbose('Checking avg load');
+        if (Logger.trace) Logger.trace(logMessage('Executing load'));
         self.sshPool.oneShot(function(err, client) {
             if (err) {
                 self.emit('error', err);
@@ -78,7 +78,7 @@ var StatsMonitor = function (sshPool, filePaths, rate) {
     }
 
     function diskSpace (path) {
-        if (Logger.verbose) Logger.verbose('Checking disk space for ' + path);
+        if (Logger.trace) Logger.trace(logMessage('Executing diskSpace(' + path + ')'));
         self.sshPool.oneShot(function(err, client) {
             if (err) {
                 self.emit('error', err);
@@ -100,7 +100,7 @@ var StatsMonitor = function (sshPool, filePaths, rate) {
     }
 
     function memoryUsed () {
-        if (Logger.verbose) Logger.verbose('Checking memory used');
+        if (Logger.trace) Logger.trace(logMessage('Executing memoryUsed'));
         self.sshPool.oneShot(function(err, client) {
             if (err) {
                 self.emit('error', err);
@@ -122,6 +122,13 @@ var StatsMonitor = function (sshPool, filePaths, rate) {
         ret = ret.substr('function '.length);
         ret = ret.substr(0, ret.indexOf('('));
         return ret;
+    }
+
+    function logMessage (message) {
+        var host = self.sshPool.options.host;
+        var port = self.sshPool.options.port;
+        port = port ? port : 22;
+        return 'StatsMonitor[' + host + ':' + port.toString() + ']: ' + message;
     }
 
 };

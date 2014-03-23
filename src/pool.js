@@ -86,13 +86,13 @@ SSHConnectionPool.prototype.spawnClient = function (callback) {
     });
     client.on('error', function(e) {
         if (Logger.error) Logger.error(self.logMessage(e));
-        callback(e);
+        callback(e,client);
     });
     client.on('end', function() {
         if (Logger.debug) Logger.debug(self.logMessage('Connection ended'));
     });
     client.on('close', function(had_error) {
-        if (had_error && Logger.info) Logger.info(self.logMessage('Connection closed due to error'));
+        if (had_error) Logger.error(self.logMessage('Connection closed due to error'));
         else if (Logger.info) Logger.info(self.logMessage('Connection closed cleanly'));
     });
 //    var socket = new Socket();
