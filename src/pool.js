@@ -48,7 +48,7 @@ SSHConnectionPool.prototype.acquire = function (callback) {
     var self = this;
     this.pool.acquire(function (err, client) {
         if (err) {
-            Logger.error(logMessage('Acquisition failed - '+err));
+            Logger.error(self.logMessage('Acquisition failed - '+err));
 
         }
         else {
@@ -56,7 +56,7 @@ SSHConnectionPool.prototype.acquire = function (callback) {
             if (Logger.verbose) {
                 var message = 'Acquisition succeeded. There are now ' + self.pool.availableObjectsCount() +
                     '/' + self.pool.getPoolSize() + ' connections available.';
-                Logger.verbose(logMessage(message));
+                Logger.verbose(self.logMessage(message));
             }
         }
         callback(err, client);
@@ -70,27 +70,30 @@ SSHConnectionPool.prototype.release = function (client) {
     else {
         Logger.warn('Attempted to release a null client...');
     }
-    log.call(this, 'verbose', 'Release succeeded. There are now ' + this.pool.availableObjectsCount() +
-        '/' + this.pool.getPoolSize() + ' connections available.');
+    if (Logger.verbose) {
+        var message = 'Release succeeded. There are now ' + this.pool.availableObjectsCount() +
+            '/' + this.pool.getPoolSize() + ' connections available.';
+        Logger.verbose(this.logMessage(message))
+    }
 };
 
 SSHConnectionPool.prototype.spawnClient = function (callback) {
     var self = this;
     var client = new ssh.SSHConnection();
     client.on('ready', function() {
-        log.call(self, 'info', 'Connection established');
+        if (Logger.info) Logger.info(self.logMessage('Connection established'));
         callback(null,client);
     });
     client.on('error', function(e) {
-        log.call(self, 'error', e);
+        if (Logger.error) Logger.error(self.logMessage(e));
         callback(e);
     });
     client.on('end', function() {
-        log.call(self, 'debug', 'Connection ended');
+        if (Logger.debug) Logger.debug(self.logMessage('Connection ended'));
     });
     client.on('close', function(had_error) {
-        if (had_error) log.call(self, 'info', 'Connection closed due to error');
-        else log.call(self, 'info', 'Connection closed cleanly');
+        if (had_error && Logger.info) Logger.info(self.logMessage('Connection closed due to error'));
+        else if (Logger.info) Logger.info(self.logMessage('Connection closed cleanly'));
     });
 //    var socket = new Socket();
 //    socket.setNoDelay(true);
@@ -146,14 +149,13 @@ SSHConnectionPool.prototype.toString = function() {
 
 /**
  * Log host+port details as well as the message.
- * @param level
  * @param message
  */
-function logMessage(message) {
+SSHConnectionPool.prototype.logMessage = function(message) {
     var host = this.options.host;
     var port = this.options.port ? this.options.port : "";
     message = 'SSHConnectionPool[' + host + ":" + port.toString() + "] " + message;
     return message;
-}
+};
 
 exports.SSHConnectionPool = SSHConnectionPool;
