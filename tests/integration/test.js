@@ -88,3 +88,11 @@ describe('Integration Tests', function () {
     });
 
 });
+
+
+process.on('SIGINT', function () {
+    logger.info('Received SIGINT');
+    system.terminate(function () {
+        process.exit(0);
+    })
+});
